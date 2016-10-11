@@ -10,8 +10,6 @@ if [ ! -d "${MONIT_HOME}/monitrc.d" ]; then
   set httpd port 2812
     allow localhost
     allow test:test
-
-  set mmonit ${MONIT_URL}
 EOF
 fi
 

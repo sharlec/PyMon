@@ -1,10 +1,8 @@
 FROM alpine:3.4
 MAINTAINER Marcel Grossmann <whatever4711@gmail.com>
 
-ENV MONIT_VERSION=5.19.0 \
-    MONIT_HOME=/etc/monit \
+ENV MONIT_HOME=/etc/monit \
     MONIT_LOG=/var/log/monit \
-    MONIT_URL=http://141.13.92.7:8000/monitcollector/collector \
     PATH=$PATH:/opt/bin
 
 RUN apk add --update monit bash && \
