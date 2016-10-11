@@ -4,4 +4,4 @@ set httpd port 2812
   allow localhost
   allow test:test
 
-set mmonit http://141.13.92.7:8000/monitcollector/collector
+set mmonit http://localhost:8000/monitcollector/collector

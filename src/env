@@ -1,0 +1,9 @@
+DEBUG=True
+SECRET_KEY=s3cr3t_key
+NEVERCACHE_KEY=s3cr3t_key
+ALLOWED_HOSTS=
+MONIT_USER=your_user
+MONIT_PASSWORD=your_password
+MONIT_PORT=2812
+ALLOWED_HOSTS=['*']
+DATABASE_URL=sqlite:////tmp/db.sqlite3

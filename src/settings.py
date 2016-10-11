@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+from decouple import config
+import dj_database_url
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -22,15 +24,14 @@ STATIC_ROOT = os.path.join(PROJECT_ROOT, STATIC_URL.strip("/"))
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "WfAp0uVMTpo-0AV2EPsAm-Y3KVgD0u-TTFnBfgzvZSoCb6s-yeIforfF4--2jLAd-UAgW7KNrJtrgC6wxSQqitTcUQ-y3hUVUEbT"
-NEVERCACHE_KEY = "-bD-gDbPUd85bD6xiIMRZ-U-2ShfnE-Vurbp1ox-lh7Rt85DeUeeLn-VDwfxy2s82PB0-g-E5RLVw-sLh02zI--Ny7B5k-atyWXH"
-
+SECRET_KEY = config('SECRET_KEY')
+NEVERCACHE_KEY = config('NEVERCACHE_KEY')
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = ["monitcollector.cfs-me-research.net"]
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=lambda v: [s.strip() for s in v.split(',')])
 
 # update period in seconds. only used for the graphs in the frontend
 # should be the same as set in the monitrc file e.g. "set daemon 60"
@@ -39,9 +40,9 @@ MONIT_UPDATE_PERIOD = 60
 MAXIMUM_STORE_DAYS = 7.
 
 ENABLE_BUTTONS = True
-MONIT_USER = "your_user"
-MONIT_PASSWORD = "your_password"
-MONIT_PORT = 2812
+MONIT_USER = config('MONIT_USER')
+MONIT_PASSWORD = config('MONIT_PASSWORD')
+MONIT_PORT = config('MONIT_PORT', default=2821, cast=int)
 
 
 # Application definition
@@ -89,41 +90,10 @@ TEMPLATES = [
 WSGI_APPLICATION = 'wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/1.8/ref/settings/#databases
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-#     }
-# }
-
-# For development
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'data/monitcollector.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default = config('DATABASE_URL'))
 }
-
-#DATABASES = {
-#    "default": {
-        # Ends with "postgresql_psycopg2", "mysql", "sqlite3" or "oracle".
-#        "ENGINE": "django.db.backends.postgresql_psycopg2",
-        # DB name or path to database file if using sqlite3.
-#        "NAME": "pymonit",
-        # Not used with sqlite3.
-#        "USER": "pymonit",
-        # Not used with sqlite3.
-#        "PASSWORD": "yourpassword",
-        # Set to empty string for localhost. Not used with sqlite3.
-#        "HOST": "localhost",
-        # Set to empty string for default. Not used with sqlite3.
-#        "PORT": "",
-#    }
-#}
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
