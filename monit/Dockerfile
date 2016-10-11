@@ -1,0 +1,25 @@
+FROM alpine:3.4
+MAINTAINER Marcel Grossmann <whatever4711@gmail.com>
+
+ENV MONIT_VERSION=5.19.0 \
+    MONIT_HOME=/etc/monit \
+    MONIT_LOG=/var/log/monit \
+    MONIT_URL=http://141.13.92.7:8000/monitcollector/collector \
+    PATH=$PATH:/opt/bin
+
+RUN apk add --update monit bash && \
+    mkdir -p ${MONIT_LOG}
+
+RUN mkdir -p ${MONIT_HOME} && \
+    echo "include ${MONIT_HOME}/monitrc.d/*" > ${MONIT_HOME}/monitrc && \
+    echo "set logfile ${MONIT_LOG}/monit.log" >> ${MONIT_HOME}/monitrc && \
+    echo "set pidfile ${MONIT_LOG}/monit.pid" >> ${MONIT_HOME}/monitrc && \
+    echo "set statefile ${MONIT_LOG}/monit.state" >> ${MONIT_HOME}/monitrc && \
+    chmod 700 ${MONIT_HOME}/monitrc && \
+    rm -f /etc/monitrc && \
+    ln -s /etc/monit/monitrc /etc/monitrc
+
+ADD monit-start.sh ${MONIT_HOME}/
+RUN chmod +x ${MONIT_HOME}/monit-start.sh
+
+ENTRYPOINT ["/bin/bash","-c","${MONIT_HOME}/monit-start.sh"]
