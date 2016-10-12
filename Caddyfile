@@ -1,0 +1,10 @@
+# Caddyfile
+
+localhost:80 {
+  tls off
+	root /var/www/html
+	proxy / http://monitcollector:8000 {
+    except /static
+    transparent
+  }
+}

@@ -1,0 +1,15 @@
+version: '2'
+
+services:
+
+  monitcollector:
+    build: ./src
+    volumes:
+      - ./src:/usr/src/app
+
+  monit:
+    build: ./monit
+    privileged: True
+    network_mode: "host"
+    volumes:
+      - ./monit/basic:/etc/monit/monitrc.d/basic

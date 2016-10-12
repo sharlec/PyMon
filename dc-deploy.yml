@@ -1,0 +1,57 @@
+version: '2'
+
+volumes:
+  static:
+    driver: local
+
+networks:
+  backend:
+    driver: bridge
+  internal:
+    driver: bridge
+
+services:
+  db:
+    image: postgres:9.6.0
+    restart: always
+    expose:
+      - 5432
+    networks:
+      - internal
+    environment:
+      - POSTGRES_DB=pymonit
+
+  monitcollector:
+    extends:
+      file: dc-base.yml
+      service: monitcollector
+    depends_on:
+      - db
+    environment:
+      - DECOUPLE_DB=postgresql://postgres:postgres@db/pymonit
+      - LISTEN_PORT=8000
+    volumes:
+      - static:/usr/src/app/static
+    expose:
+      - 8000
+    networks:
+      - internal
+
+  monit:
+    extends:
+      file: dc-base.yml
+      service: monit
+    environment:
+      - MMONIT_URL=http://localhost/monitcollector/collector
+
+  caddy:
+    image: zzrot/alpine-caddy:v0.9.3
+    restart: always
+    networks:
+      - internal
+      - backend
+    volumes:
+      - static:/var/www/html/static
+      - ./Caddyfile:/etc/Caddyfile
+    ports:
+      - "80:80"

@@ -13,6 +13,13 @@ if [ ! -d "${MONIT_HOME}/monitrc.d" ]; then
 EOF
 fi
 
+if [ ! -z "${MMONIT_URL}" ]; then
+  cat <<-EOF > ${MONIT_HOME}/monitrc.d/mmonit
+  set mmonit ${MMONIT_URL}
+EOF
+fi
+
+
 for i in "${MONIT_LOG}/monit.pid ${MONIT_LOG}/monit.state"
 do
 	if [ -e "$i" ]; then

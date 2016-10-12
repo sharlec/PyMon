@@ -1,7 +1,5 @@
-set daemon 60
+set daemon 1
 
 set httpd port 2812
   allow localhost
   allow test:test
-
-set mmonit http://localhost:8000/monitcollector/collector
