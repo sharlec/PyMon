@@ -1,4 +1,5 @@
 #!/bin/bash
+# This file is used inside a container
 WORKDIR=/usr/src/app
 
 cp ${WORKDIR}/env ${WORKDIR}/.env

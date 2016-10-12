@@ -1,4 +1,5 @@
 #!/bin/sh
+# This file is used inside a container
 WORKDIR=/usr/src/app
 APP="monitcollector"
 
