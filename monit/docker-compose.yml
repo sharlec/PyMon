@@ -1,9 +1,0 @@
-version: '2'
-
-services:
-  monit:
-    build: .
-    privileged: True
-    network_mode: "host"
-    volumes:
-      - ./basic:/etc/monit/monitrc.d/basic
