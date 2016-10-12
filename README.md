@@ -6,9 +6,9 @@ There is a very similar app for the server monitoring tool <a href="https://gith
 
 
 ### Features
-- Collects and parses monit xml data from one or multiple servers. 
-- Stores the data for a given time period. 
-- Displays it in pretty graphs. 
+- Collects and parses monit xml data from one or multiple servers.
+- Stores the data for a given time period.
+- Displays it in pretty graphs.
 - Start/stop/restart buttons for processes.
 - Status tables and graphs are refreshing automatically via ajax.
 - Processes are automatically removed when they stop sending data (removed from monitrc). Servers can be deleted manually.
@@ -50,7 +50,7 @@ Collect static files:
 ```
 python manage.py collectstatic
 ```
-With correct webserver configurating the app should then be available at http://mydomain.com/monitcollector/. 
+With correct webserver configurating the app should then be available at http://mydomain.com/monitcollector/.
 
 In your monitrc file add this line to send data to the collector.
 ```
@@ -61,15 +61,15 @@ If you want to enable the start/stop buttons (optional), the monit http daemon m
 set httpd port 2812
   allow myuser:mypassword
 ```
-If you don't want to allow access from everywhere add "allow ip.address..." with the ip address of the server, where monitcollector is installed. 
-The user and password have to be set in the settings.py:
+If you don't want to allow access from everywhere add "allow ip.address..." with the ip address of the server, where monitcollector is installed.
+The user and password have to be set in the .env file (Copy the existing env to .env and change your settings locally):
 ```
 ENABLE_BUTTONS = True
 MONIT_USER = youruser
 MONIT_PASSWORD = yourpassword
 MONIT_PORT = 2812
 ```
-You don't have to specify the port if you use the default port 2812. Also, the port must not me blocked by the firewall, e.g. 
+You don't have to specify the port if you use the default port 2812. Also, the port must not me blocked by the firewall, e.g.
 ```
 ufw allow 2812
 ```
@@ -86,9 +86,8 @@ Then you should have the same port and pid path in your gunicorn.conf
 ```
 bind = '127.0.0.1:8011'
 ...
-pidfile = '/path/to/pid/gunicorn.pid' 
+pidfile = '/path/to/pid/gunicorn.pid'
 ```
 
 ### License
 BSD License.
-
