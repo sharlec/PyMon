@@ -1,6 +1,6 @@
 FROM python:3.5-alpine
 
-RUN apk add --update --no-cache postgresql-client postgresql-dev sqlite bash g++
+RUN apk add --update --no-cache postgresql-client postgresql-dev sqlite g++
 COPY ./requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
