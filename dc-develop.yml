@@ -10,6 +10,7 @@ services:
       file: dc-base.yml
       service: monitcollector
     volumes:
+      - ./src:/usr/src/app
       - sqlitedb:/usr/src/app/data
     environment:
       - LISTEN_PORT=8000

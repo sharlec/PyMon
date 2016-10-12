@@ -17,7 +17,7 @@ RUN mkdir -p ${MONIT_HOME} && \
     rm -f /etc/monitrc && \
     ln -s /etc/monit/monitrc /etc/monitrc
 
-ADD monit-start.sh ${MONIT_HOME}/
+COPY monit-start.sh ${MONIT_HOME}/
 RUN chmod +x ${MONIT_HOME}/monit-start.sh
 
 ENTRYPOINT ["/bin/bash","-c","${MONIT_HOME}/monit-start.sh"]

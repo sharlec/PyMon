@@ -28,10 +28,11 @@ def time_str(uptime):
     """ converts uptime in seconds to a time string """
     if not isinstance(uptime, int):
         return ""
-    mins = (uptime/60) % 60
-    hours = (uptime/60/60) % 24
-    days = (uptime/24/60/60) % 365
-    years = uptime/365/24/60/60
+
+    mins = int((uptime/60) % 60)
+    hours = int((uptime/60/60) % 24)
+    days = int((uptime/24/60/60) % 365)
+    years = int(uptime/365/24/60/60)
     if years == 0:
       if days == 0:
         if hours == 0:

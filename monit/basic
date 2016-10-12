@@ -1,4 +1,4 @@
-set daemon 1
+set daemon 60
 
 set httpd port 2812
   allow localhost
