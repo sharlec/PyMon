@@ -12,7 +12,7 @@ RUN mkdir /caddysrc && \
     printf "localhost:80" > /etc/Caddyfile
 
 RUN mkdir -p /srv
-RUN mkdir -p /root/.caddy/letsencrypt
+RUN mkdir -p /root/.caddy/acme
 EXPOSE 80 443 2015
 
 WORKDIR /srv
