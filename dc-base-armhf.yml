@@ -5,7 +5,7 @@ services:
   monitcollector:
     build:
       context: ./src
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.armhf
     image: monitcollector
     volumes:
       - ./src:/usr/src/app
@@ -13,7 +13,7 @@ services:
   monit:
     build:
       context: ./monit
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.armhf
     image: monit
     privileged: True
     network_mode: "host"
