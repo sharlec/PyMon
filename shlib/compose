@@ -1,0 +1,143 @@
+#!/bin/sh
+
+BASE=base.yml
+RUN=docker-compose.yml
+
+function baseyml() {
+cat<<-EOF > "${BASE}"
+version: '2'
+
+services:
+
+  monitcollector:
+    build:
+      context: ./src
+      dockerfile: Dockerfile.${ARCH}
+    image: monitcollector
+    volumes:
+      - ./src:/usr/src/app
+
+  monit:
+    build:
+      context: ./monit
+      dockerfile: Dockerfile.${ARCH}
+    image: monit
+    privileged: True
+    network_mode: "host"
+    volumes:
+      - ./monit/basic:/etc/monit/monitrc.d/basic
+EOF
+}
+
+function deployyml() {
+cat<<-EOF > "${RUN}"
+version: '2'
+
+volumes:
+  static:
+    driver: local
+
+networks:
+  backend:
+    driver: bridge
+  internal:
+    driver: bridge
+
+services:
+  db:
+    image: postgres:9.6.0
+    restart: always
+    expose:
+      - 5432
+    networks:
+      - internal
+    environment:
+      - POSTGRES_DB=pymonit
+
+  monitcollector:
+    extends:
+      file: "${BASE}"
+      service: monitcollector
+    depends_on:
+      - db
+    environment:
+      - DECOUPLE_DB=postgresql://postgres:postgres@db/pymonit
+      - LISTEN_PORT=8000
+    volumes:
+      - static:/usr/src/app/static
+    expose:
+      - 8000
+    networks:
+      - internal
+
+  monit:
+    extends:
+      file: "${BASE}"
+      service: monit
+    environment:
+      - MMONIT_URL=http://localhost/monitcollector/collector
+
+  caddy:
+    image: zzrot/alpine-caddy:v0.9.3
+    restart: always
+    networks:
+      - internal
+      - backend
+    volumes:
+      - static:/var/www/html/static
+      - ./caddy/Caddyfile:/etc/Caddyfile
+    ports:
+      - "80:80"
+EOF
+}
+
+function developyml() {
+cat<<-EOF > "${RUN}"
+version: '2'
+
+volumes:
+  sqlitedb:
+    driver: local
+
+services:
+  monitcollector:
+    extends:
+      file: "${BASE}"
+      service: monitcollector
+    volumes:
+      - ./src:/usr/src/app
+      - sqlitedb:/usr/src/app/data
+    environment:
+      - LISTEN_PORT=8000
+    ports:
+      - "8000:8000"
+    entrypoint: /pythonstart.sh
+
+  monit:
+    extends:
+      file: "${BASE}"
+      service: monit
+    environment:
+      - MMONIT_URL=http://localhost:8000/monitcollector/collector
+EOF
+}
+
+function start() {
+  local gdir=${PWD##*/}
+  local dir=${orgdir//[-]/}
+  service=monitcollector
+  name=${dir}_${service}_1
+  local yml=${RUN}
+
+  docker-compose -f ${yml} up -d
+  sleep 2
+  echo "Setting up ${name}"
+
+  docker exec -it ${name} python manage.py createsuperuser --username "admin" --email "admin@example.com"
+
+  ln -sf ${yml} docker-compose.yml
+
+  echo "To stop the container again execute"
+  echo "docker-compose down -v"
+
+}
