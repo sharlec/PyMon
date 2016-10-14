@@ -1,4 +1,4 @@
-FROM armhf/alpine:v3.4
+FROM armhf/alpine:3.4
 MAINTAINER Marcel Grossmann <whatever4711@gmail.com>
 
 ENV MONIT_HOME=/etc/monit \
