@@ -48,7 +48,10 @@ services:
       - MMONIT_URL=http://localhost/monitcollector/collector
 
   caddy:
-    image: zzrot/alpine-caddy:v0.9.3
+    build:
+      context: ./caddy
+      dockerfile: Dockerfile.armhf
+    image: caddy
     restart: always
     networks:
       - internal
