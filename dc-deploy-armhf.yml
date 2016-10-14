@@ -12,6 +12,9 @@ networks:
 
 services:
   db:
+    build:
+      context: ./postgres
+      dockerfile: Dockerfile.armhf
     image: postgres:9.6.0
     restart: always
     expose:
@@ -23,7 +26,7 @@ services:
 
   monitcollector:
     extends:
-      file: dc-base.yml
+      file: dc-base-armhf.yml
       service: monitcollector
     depends_on:
       - db
@@ -39,7 +42,7 @@ services:
 
   monit:
     extends:
-      file: dc-base.yml
+      file: dc-base-armhf.yml
       service: monit
     environment:
       - MMONIT_URL=http://localhost/monitcollector/collector
@@ -52,6 +55,6 @@ services:
       - backend
     volumes:
       - static:/var/www/html/static
-      - ./caddy/Caddyfile:/etc/Caddyfile
+      - ./Caddyfile:/etc/Caddyfile
     ports:
       - "80:80"
