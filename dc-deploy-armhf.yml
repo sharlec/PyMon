@@ -58,6 +58,6 @@ services:
       - backend
     volumes:
       - static:/var/www/html/static
-      - ./Caddyfile:/etc/Caddyfile
+      - ./caddy/Caddyfile:/etc/Caddyfile
     ports:
       - "80:80"
