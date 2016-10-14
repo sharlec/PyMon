@@ -9,7 +9,7 @@ if [ "$1" = 'postgres' ]; then
 	mkdir -p "$PGDATA"
 	chmod 700 "$PGDATA"
 	chown -R postgres "$PGDATA"
-
+	mkdir -p /run/postgresql
 	chmod g+s /run/postgresql
 	chown -R postgres /run/postgresql
 
