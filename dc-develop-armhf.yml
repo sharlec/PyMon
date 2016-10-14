@@ -20,7 +20,7 @@ services:
 
   monit:
     extends:
-      file: dc-base.yml
+      file: dc-base-armhf.yml
       service: monit
     environment:
       - MMONIT_URL=http://localhost:8000/monitcollector/collector
