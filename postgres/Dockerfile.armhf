@@ -3,13 +3,12 @@ MAINTAINER Marcel Grossmann <whatever4711@gmail.com>
 
 # grab gosu for easy step-down from root
 ENV ARCH armhf
-ENV GOSU_VERSION 1.7
+ENV GOSU_VERSION 1.4
 ENV LANG en_US.utf8
 ENV PGDATA /var/lib/postgresql/data
 
-RUN apk --update add \
-    postgresql \
-    curl \
+RUN apk add --update --no-cache \
+    postgresql curl bash \
     && curl -o /usr/local/bin/gosu -sSL "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$ARCH" \
     && chmod +x /usr/local/bin/gosu \
     && apk del curl \
