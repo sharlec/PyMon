@@ -1,0 +1,14 @@
+FROM armhf/python:3.5-alpine
+
+RUN apk add --no-cache --update bash postgresql-client postgresql-dev sqlite g++
+
+WORKDIR /usr/src/app
+
+COPY requirements.txt ./
+RUN pip install -r requirements.txt
+
+COPY ./gunicornup.sh /
+COPY ./pythonstart.sh /
+RUN chmod +x /gunicornup.sh && chmod +x /pythonstart.sh && mkdir -p /usr/src/logs/
+VOLUME ["/usr/src/logs/","/usr/src/app/static"]
+ENTRYPOINT ["/gunicornup.sh"]
