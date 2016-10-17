@@ -130,7 +130,20 @@ function start() {
   fi
 
   docker-compose -f ${yml} up -d
-  sleep 5
+
+  local finished="static files copied"
+
+  local looping=true
+  while looping; do
+    docker-compose -f "${yml}" logs "${service}" | grep "${finished}" &> /dev/null
+    if [ $? == 0 ]; then
+      looping = false
+      break
+    else
+      sleep 1
+    fi
+  done
+
 
   if [[ "$created" == "true" ]]; then
     echo "Setting up ${name}"
@@ -138,4 +151,9 @@ function start() {
   fi
   echo "To stop the container again execute"
   echo "docker-compose down -v"
+}
+
+function logs() {
+  string=$(docker-compose -f $1 logs $2 | grep -q $3)
+  echo "${string}"
 }
