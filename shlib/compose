@@ -1,14 +1,9 @@
 #!/bin/sh
 
-BASE=base.yml
 RUN=docker-compose.yml
 
-function baseyml() {
-cat<<-EOF > "${BASE}"
-version: '2'
-
-services:
-
+function monitcollector() {
+cat <<-EOF
   monitcollector:
     build:
       context: ./src
@@ -16,7 +11,11 @@ services:
     image: monitcollector
     volumes:
       - ./src:/usr/src/app
+EOF
+}
 
+function monit() {
+  cat <<-EOF
   monit:
     build:
       context: ./monit
@@ -30,6 +29,7 @@ EOF
 }
 
 function deployyml() {
+  local RUN=$1
 cat<<-EOF > "${RUN}"
 version: '2'
 
@@ -45,7 +45,10 @@ networks:
 
 services:
   db:
-    image: postgres:9.6.0
+    build:
+      context: ./postgres
+      dockerfile: Dockerfile.${ARCH}
+    image: postgres
     restart: always
     expose:
       - 5432
@@ -54,31 +57,27 @@ services:
     environment:
       - POSTGRES_DB=pymonit
 
-  monitcollector:
-    extends:
-      file: "${BASE}"
-      service: monitcollector
+$(monitcollector)
+      - static:/usr/src/app/static
     depends_on:
       - db
     environment:
       - DECOUPLE_DB=postgresql://postgres:postgres@db/pymonit
       - LISTEN_PORT=8000
-    volumes:
-      - static:/usr/src/app/static
     expose:
       - 8000
     networks:
       - internal
 
-  monit:
-    extends:
-      file: "${BASE}"
-      service: monit
+$(monit)
     environment:
       - MMONIT_URL=http://localhost/monitcollector/collector
 
   caddy:
-    image: zzrot/alpine-caddy:v0.9.3
+    build:
+      context: ./caddy
+      dockerfile: Dockerfile.${ARCH}
+    image: caddy
     restart: always
     networks:
       - internal
@@ -92,6 +91,8 @@ EOF
 }
 
 function developyml() {
+  local RUN=$1
+
 cat<<-EOF > "${RUN}"
 version: '2'
 
@@ -100,12 +101,7 @@ volumes:
     driver: local
 
 services:
-  monitcollector:
-    extends:
-      file: "${BASE}"
-      service: monitcollector
-    volumes:
-      - ./src:/usr/src/app
+$(monitcollector)
       - sqlitedb:/usr/src/app/data
     environment:
       - LISTEN_PORT=8000
@@ -113,31 +109,33 @@ services:
       - "8000:8000"
     entrypoint: /pythonstart.sh
 
-  monit:
-    extends:
-      file: "${BASE}"
-      service: monit
+$(monit)
     environment:
       - MMONIT_URL=http://localhost:8000/monitcollector/collector
 EOF
 }
 
 function start() {
-  local gdir=${PWD##*/}
-  local dir=${orgdir//[-]/}
-  service=monitcollector
-  name=${dir}_${service}_1
-  local yml=${RUN}
+  local yml="$1"
+  local simple="$2"
+  local created="$3"
+  local orgdir="${PWD##*/}"
+  local dir="${orgdir//[-]/}"
+  local service=monitcollector
+  local name="${dir}_${service}_1"
+
+  if [[ "$simple" == "false" ]]; then
+    docker-compose -f ${yml} up -d db
+    sleep 5
+  fi
 
   docker-compose -f ${yml} up -d
   sleep 2
-  echo "Setting up ${name}"
 
-  docker exec -it ${name} python manage.py createsuperuser --username "admin" --email "admin@example.com"
-
-  ln -sf ${yml} docker-compose.yml
-
+  if [[ "$created" == "true" ]]; then
+    echo "Setting up ${name}"
+    docker exec -it ${name} python manage.py createsuperuser --username "admin" --email "admin@example.com"
+  fi
   echo "To stop the container again execute"
   echo "docker-compose down -v"
-
 }

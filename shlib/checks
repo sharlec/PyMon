@@ -1,5 +1,10 @@
 #!/bin/sh
 
 function arch() {
-    ARCH=
+  case $(uname -m) in
+    x86_64) ARCH="amd64";;
+    armv7l|armv6l) ARCH="armhf";;
+    *) echo "Unsupported Architecture" && exit 0;;
+  esac
+  echo "Detected architecture: ${ARCH}"
 }

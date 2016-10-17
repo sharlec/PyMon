@@ -1,7 +1,7 @@
-FROM armhf/alpine:3.4
+FROM alpine:3.4
 MAINTAINER Marcel Grossmann <whatever4711@gmail.com>
 
-ENV arch=arm
+ENV arch=amd64
 RUN apk add --update --no-cache openssh-client curl git tar
 
 RUN mkdir /caddysrc && \

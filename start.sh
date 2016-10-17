@@ -2,21 +2,53 @@
 source shlib/compose
 source shlib/checks
 
+COMPOSE="docker-compose.yml"
+DEVELOP=true
+CREATED=false
+
+if [[ -z "${ARCH}" ]];
+  then arch;
+fi
+
 function develop(){
-  baseyml
-  echo "Not implemented yet"
+  if [ ! -f ${COMPOSE} ]; then
+    echo "Starting development environment"
+    developyml "${COMPOSE}"
+    DEVELOP=true
+    CREATED=true
+  else
+    echo "Restarting previous session"
+    echo "Clean up if you switch between development/deployment"
+    CREATED=false
+  fi
+  start "${COMPOSE}" "${DEVELOP}" "${CREATED}"
 }
 
 function deploy() {
-  echo "Not implemented yet"
+  if [ ! -f ${COMPOSE} ]; then
+    echo "Starting deployment environment"
+    deployyml "${COMPOSE}"
+    DEVELOP=false
+    CREATED=true
+  else
+    echo "Restarting previous session"
+    echo "Clean up if you switch between development/deployment"
+    CREATED=false
+  fi
+  start "${COMPOSE}" "${DEVELOP}" "${CREATED}"
 }
 
 function build() {
-  echo "Not implemented yet"
+  docker-compose build
 }
 
 function stop() {
-  echo "Not implemented yet"
+  docker-compose stop
+}
+
+function clean() {
+  docker-compose down -v
+  rm "${COMPOSE}"
 }
 
 function usage(){
@@ -27,6 +59,7 @@ cat << EOM
   deploy        initialize service with a postgres db and a caddy server
   build         rebuild all docker images
   stop          stop the application
+  clean         remove everything (invokes stop)
 
 EOM
 }
@@ -39,21 +72,12 @@ if [[ $DEBUG == "true" ]]; then
 #  exec "$@"
 elif [ $# -eq 1 ]; then
   case "$1" in
-    "develop" )
-      develop
-      ;;
-    "deploy" )
-      deploy
-      ;;
-    "build" )
-      build
-      ;;
-    "stop" )
-      stop
-      ;;
-    * )
-      usage
-      ;;
+    "develop")  develop;;
+    "deploy")   deploy;;
+    "build")    build;;
+    "stop")     stop;;
+    "clean")    clean;;
+    *) usage;;
   esac
 else
   usage
