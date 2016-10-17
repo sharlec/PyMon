@@ -130,7 +130,7 @@ function start() {
   fi
 
   docker-compose -f ${yml} up -d
-  sleep 2
+  sleep 5
 
   if [[ "$created" == "true" ]]; then
     echo "Setting up ${name}"
