@@ -23,6 +23,8 @@ services:
       - internal
     environment:
       - POSTGRES_DB=pymonit
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
 
   monitcollector:
     extends:
@@ -60,4 +62,4 @@ services:
       - static:/var/www/html/static
       - ./caddy/Caddyfile:/etc/Caddyfile
     ports:
-      - "80:80"
+      - "888:888"
