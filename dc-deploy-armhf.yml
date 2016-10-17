@@ -47,7 +47,7 @@ services:
       file: dc-base-armhf.yml
       service: monit
     environment:
-      - MMONIT_URL=http://localhost/monitcollector/collector
+            - MMONIT_URL=http://localhost:888/monitcollector/collector
 
   caddy:
     build:
