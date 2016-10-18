@@ -2,6 +2,10 @@
 source shlib/compose
 source shlib/checks
 
+ADMIN=admin
+EMAIL="abc@example.com"
+PASSWD=1234
+
 COMPOSE="docker-compose.yml"
 DEVELOP=true
 CREATED=false
@@ -65,13 +69,7 @@ cat << EOM
 EOM
 }
 
-# DIR=caddytest
-if [[ $DEBUG == "true" ]]; then
-  echo "$@"
-  eval "$@"
-  exit 0
-#  exec "$@"
-elif [ $# -eq 1 ]; then
+if [ $# -eq 1 ]; then
   case "$1" in
     "develop")  develop;;
     "deploy")   deploy;;

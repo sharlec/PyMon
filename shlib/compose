@@ -115,6 +115,7 @@ $(monit)
 EOF
 }
 
+
 function start() {
   local yml="$1"
   local simple="$2"
@@ -134,7 +135,11 @@ function start() {
 
   if [[ "$created" == "true" ]]; then
     info "Setting up ${name}"
-    docker exec -it ${name} python manage.py createsuperuser --username "admin" --email "admin@example.com"
+    read -r -d '' PYTHON <<-EOM
+from django.contrib.auth.models import User;
+User.objects.create_superuser('${ADMIN}', '${EMAIL}', '${PASSWD}')
+EOM
+    docker exec ${name} /bin/sh -c "echo \"$PYTHON\" | python manage.py shell"
   fi
   info "To stop the container again execute"
   info "docker-compose down -v"
