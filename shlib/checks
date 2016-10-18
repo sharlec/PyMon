@@ -14,8 +14,13 @@ function evaluate_result(){
 function waiting() {
   local seconds="${1}"
   local message="${2}"
-  echo -e "\e[33m  [...]  Waiting ${seconds}s ${message}\e[0m"
+  echo -e "\e[33m  [...] Waiting ${seconds}s ${message}\e[0m"
   sleep ${seconds}
+}
+
+function info() {
+  local message="${1}"
+  echo -e "\e[36m  [INFO]  ${message}\e[0m"
 }
 
 function arch() {

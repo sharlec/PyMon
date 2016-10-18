@@ -5,6 +5,7 @@ source shlib/checks
 COMPOSE="docker-compose.yml"
 DEVELOP=true
 CREATED=false
+TIMEOUT=10
 
 check_dependencies
 arch
@@ -12,13 +13,13 @@ evaluate_result $? " Detected architecture: ${ARCH}"
 
 function develop(){
   if [ ! -f ${COMPOSE} ]; then
-    echo "Starting development environment"
+    info "Starting development environment"
     developyml "${COMPOSE}"
     DEVELOP=true
     CREATED=true
   else
-    echo "Restarting previous session"
-    echo "Clean up if you want to switch between development/deployment"
+    info "Restarting previous session"
+    info "Clean up if you want to switch between development/deployment"
     CREATED=false
   fi
   start "${COMPOSE}" "${DEVELOP}" "${CREATED}"
@@ -26,13 +27,13 @@ function develop(){
 
 function deploy() {
   if [ ! -f ${COMPOSE} ]; then
-    echo "Starting deployment environment"
+    info "Starting deployment environment"
     deployyml "${COMPOSE}"
     DEVELOP=false
     CREATED=true
   else
-    echo "Restarting previous session"
-    echo "Clean up if you want to switch between development/deployment"
+    info "Restarting previous session"
+    info "Clean up if you want to switch between development/deployment"
     CREATED=false
   fi
   start "${COMPOSE}" "${DEVELOP}" "${CREATED}"
@@ -48,7 +49,7 @@ function stop() {
 
 function clean() {
   docker-compose down -v
-  rm "${COMPOSE}"
+  rm -f "${COMPOSE}"
 }
 
 function usage(){

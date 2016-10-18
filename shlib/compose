@@ -126,16 +126,18 @@ function start() {
 
   if [[ "$simple" == "false" ]]; then
     waitedSleep "PostgreSQL init process complete; ready for start up" "db" "${yml}"
+    evaluate_result $? " Started service db"
   fi
   waitedSleep "static files copied" "${service}" "${yml}"
+  evaluate_result $? " Started service ${service}"
   docker-compose -f ${yml} up -d
 
   if [[ "$created" == "true" ]]; then
-    echo "Setting up ${name}"
+    info "Setting up ${name}"
     docker exec -it ${name} python manage.py createsuperuser --username "admin" --email "admin@example.com"
   fi
-  echo "To stop the container again execute"
-  echo "docker-compose down -v"
+  info "To stop the container again execute"
+  info "docker-compose down -v"
 }
 
 function waitedSleep() {
@@ -143,15 +145,20 @@ function waitedSleep() {
   local service="$2"
   local yml="$3"
   local seconds=1
+  local rc=0
 
   docker-compose -f "${yml}" up -d "${service}"
   while true; do
     docker-compose -f "${yml}" logs "${service}" | grep "${finished}" &> /dev/null
     if [ $? == 0 ]; then
       break
+    elif ((seconds < ${TIMEOUT})); then
+        waiting "${seconds}" "for "${service}" to be ready\e[0m"
+        seconds=$((seconds+1))
     else
-      waiting "${seconds}" "for "${service}" to be ready\e[0m"
-      seconds=$((seconds+1))
+        rc=1
+        break
     fi
   done
+  return $rc
 }
