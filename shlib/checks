@@ -1,10 +1,34 @@
 #!/bin/sh
 
+function evaluate_result(){
+  local returnvalue="${1}"
+  local message="${2}"
+  if [ "$returnvalue" -eq 0 ]; then
+    echo -e "\e[32m  [PASS] ${message}\e[0m"
+  else
+    echo -e "\e[31m  [FAIL] ${message}\e[0m"
+    exit 1
+  fi
+}
+
+function waiting() {
+  local seconds="${1}"
+  local message="${2}"
+  echo -e "\e[33m  [...]  Waiting ${seconds}s ${message}\e[0m"
+  sleep ${seconds}
+}
+
 function arch() {
   case $(uname -m) in
-    x86_64) ARCH="amd64";;
-    armv7l|armv6l) ARCH="armhf";;
-    *) echo "Unsupported Architecture" && exit 0;;
+    amd64|x86_64) ARCH="amd64" && return 0;;
+    arm*) ARCH="armhf" && return 0;;
+    *) ARCH=" Unsupported Architecture" && return 1;;
   esac
-  echo "Detected architecture: ${ARCH}"
+}
+
+function check_dependencies() {
+   command -v "docker" >/dev/null 2>&1
+   evaluate_result $? " Docker is installed"
+   command -v "docker-compose" >/dev/null 2>&1
+   evaluate_result $? " Docker-compose is installed"
 }

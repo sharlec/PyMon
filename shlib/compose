@@ -125,25 +125,10 @@ function start() {
   local name="${dir}_${service}_1"
 
   if [[ "$simple" == "false" ]]; then
-    docker-compose -f ${yml} up -d db
-    sleep 5
+    waitedSleep "PostgreSQL init process complete; ready for start up" "db" "${yml}"
   fi
-
+  waitedSleep "static files copied" "${service}" "${yml}"
   docker-compose -f ${yml} up -d
-
-  local finished="static files copied"
-
-  local looping=true
-  while looping; do
-    docker-compose -f "${yml}" logs "${service}" | grep "${finished}" &> /dev/null
-    if [ $? == 0 ]; then
-      looping = false
-      break
-    else
-      sleep 1
-    fi
-  done
-
 
   if [[ "$created" == "true" ]]; then
     echo "Setting up ${name}"
@@ -153,7 +138,20 @@ function start() {
   echo "docker-compose down -v"
 }
 
-function logs() {
-  string=$(docker-compose -f $1 logs $2 | grep -q $3)
-  echo "${string}"
+function waitedSleep() {
+  local finished="$1"
+  local service="$2"
+  local yml="$3"
+  local seconds=1
+
+  docker-compose -f "${yml}" up -d "${service}"
+  while true; do
+    docker-compose -f "${yml}" logs "${service}" | grep "${finished}" &> /dev/null
+    if [ $? == 0 ]; then
+      break
+    else
+      waiting "${seconds}" "for "${service}" to be ready\e[0m"
+      seconds=$((seconds+1))
+    fi
+  done
 }

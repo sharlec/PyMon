@@ -6,9 +6,9 @@ COMPOSE="docker-compose.yml"
 DEVELOP=true
 CREATED=false
 
-if [[ -z "${ARCH}" ]];
-  then arch;
-fi
+check_dependencies
+arch
+evaluate_result $? " Detected architecture: ${ARCH}"
 
 function develop(){
   if [ ! -f ${COMPOSE} ]; then
@@ -18,7 +18,7 @@ function develop(){
     CREATED=true
   else
     echo "Restarting previous session"
-    echo "Clean up if you switch between development/deployment"
+    echo "Clean up if you want to switch between development/deployment"
     CREATED=false
   fi
   start "${COMPOSE}" "${DEVELOP}" "${CREATED}"
@@ -32,7 +32,7 @@ function deploy() {
     CREATED=true
   else
     echo "Restarting previous session"
-    echo "Clean up if you switch between development/deployment"
+    echo "Clean up if you want to switch between development/deployment"
     CREATED=false
   fi
   start "${COMPOSE}" "${DEVELOP}" "${CREATED}"
