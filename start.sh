@@ -2,9 +2,9 @@
 source shlib/compose
 source shlib/checks
 
-ADMIN=admin
-EMAIL="abc@example.com"
-PASSWD=1234
+ADMIN=${ADMIN:-admin}
+PASSWD=${PASSWD:-1234}
+EMAIL=${EMAIL:-"abc@example.com"}
 
 COMPOSE="docker-compose.yml"
 DEVELOP=true

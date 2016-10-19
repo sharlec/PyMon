@@ -1,5 +1,15 @@
 set daemon 60
+set eventqueue basedir /var/monit slots 5000
 
 set httpd port 2812
+  use address 192.168.9.101
   allow localhost
+  allow 172.17.0.0/16
+  allow 192.168.9.0/25
   allow test:test
+
+#check process dockerd with pidfile /var/run/docker.pid
+check process monit with pidfile /var/run/monit.pid
+check network eth0 with interface eth0
+# Checks space and inode usage
+#check filesystem mmcblk0 with path /

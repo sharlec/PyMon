@@ -92,3 +92,4 @@ ENV/
 # Static files
 src/static/
 docker-compose.yml
+open-m-monit/*
