@@ -1,11 +1,13 @@
-FROM armhf/alpine:3.4
+FROM <IMAGE>
 MAINTAINER Marcel Grossmann <whatever4711@gmail.com>
 
-ENV arch=arm
+ENV arch <ARCH>
+ENV url "https://caddyserver.com/download/build?"
+ENV params "&features=git%2Chugo%2Cipfilter%2Cmailout%2Cprometheus%2Crealip%2Csearch"
 RUN apk add --update --no-cache openssh-client curl git tar
 
-RUN mkdir /caddysrc && \
-    curl -sL -o /caddysrc/caddy_linux_arm.tar.gz "https://caddyserver.com/download/build?os=linux&arch=${arch}&features=git%2Chugo%2Cipfilter%2Cmailout%2Cprometheus%2Crealip%2Csearch" && \
+RUN mkdir /caddysrc && CADDYARCH=$(echo "${arch}" | sed -e "s/armhf/arm/g") && \
+    curl -sL -o /caddysrc/caddy_linux_arm.tar.gz "${url}os=linux&arch=${CADDYARCH}${params}" && \
     tar -xf /caddysrc/caddy_linux_arm.tar.gz -C /caddysrc && \
     mv /caddysrc/caddy /usr/bin/caddy && \
     chmod 755 /usr/bin/caddy && \
@@ -20,3 +22,8 @@ WORKDIR /srv
 
 ENTRYPOINT ["/usr/bin/caddy"]
 CMD ["--agree", "--conf", "/etc/Caddyfile"]
+
+LABEL \
+    version=0.9.3 \
+    os="linux" \
+    arch="${arch}"

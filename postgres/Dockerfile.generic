@@ -1,8 +1,8 @@
-FROM armhf/alpine:3.4
+FROM <IMAGE>
 MAINTAINER Marcel Grossmann <whatever4711@gmail.com>
 
 # grab gosu for easy step-down from root
-ENV ARCH armhf
+ENV ARCH <ARCH>
 ENV GOSU_VERSION 1.4
 ENV LANG en_US.utf8
 ENV PGDATA /var/lib/postgresql/data
@@ -27,4 +27,4 @@ CMD [ "postgres" ]
 LABEL \
     version=9.5.4 \
     os="linux" \
-    arch="armhf"
+    arch="${arch}"

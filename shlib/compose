@@ -3,11 +3,13 @@
 RUN=docker-compose.yml
 
 function monitcollector() {
+  local src="./src"
+  python_dockerfile Dockerfile.generic Dockerfile ${src}
 cat <<-EOF
   monitcollector:
     build:
-      context: ./src
-      dockerfile: Dockerfile.${ARCH}
+      context: ${src}
+      dockerfile: Dockerfile
     image: monitcollector
     volumes:
       - ./src:/usr/src/app
@@ -15,11 +17,13 @@ EOF
 }
 
 function monit() {
+  local src="./monit"
+  alpine_dockerfile Dockerfile.generic Dockerfile ${src}
   cat <<-EOF
   monit:
     build:
-      context: ./monit
-      dockerfile: Dockerfile.${ARCH}
+      context: ${src}
+      dockerfile: Dockerfile
     image: monit
     privileged: True
     network_mode: "host"
@@ -29,7 +33,11 @@ EOF
 }
 
 function deployyml() {
-  local RUN=$1
+  local RUN="${1}"
+  local db="./postgres"
+  alpine_dockerfile Dockerfile.generic Dockerfile ${db}
+  local caddy="./caddy"
+  alpine_dockerfile Dockerfile.generic Dockerfile ${caddy}
 cat<<-EOF > "${RUN}"
 version: '2'
 
@@ -46,8 +54,8 @@ networks:
 services:
   db:
     build:
-      context: ./postgres
-      dockerfile: Dockerfile.${ARCH}
+      context: ${db}
+      dockerfile: Dockerfile
     image: postgres
     restart: always
     expose:
@@ -75,8 +83,8 @@ $(monit)
 
   caddy:
     build:
-      context: ./caddy
-      dockerfile: Dockerfile.${ARCH}
+      context: ${caddy}
+      dockerfile: Dockerfile
     image: caddy
     restart: always
     networks:
@@ -91,7 +99,7 @@ EOF
 }
 
 function developyml() {
-  local RUN=$1
+  local RUN="${1}"
 
 cat<<-EOF > "${RUN}"
 version: '2'
@@ -117,9 +125,9 @@ EOF
 
 
 function start() {
-  local yml="$1"
-  local simple="$2"
-  local created="$3"
+  local yml="${1}"
+  local simple="${2}"
+  local created="${3}"
   local orgdir="${PWD##*/}"
   local dir="${orgdir//[-]/}"
   local service=monitcollector
@@ -131,7 +139,7 @@ function start() {
   fi
   waitedSleep "static files copied" "${service}" "${yml}"
   evaluate_result $? " Started service ${service}"
-  docker-compose -f ${yml} up -d
+  docker-compose -f "${yml}" up -d
 
   if [[ "$created" == "true" ]]; then
     info "Setting up ${name}"

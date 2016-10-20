@@ -1,4 +1,5 @@
 #!/bin/bash
+source shlib/dockerfiles
 source shlib/compose
 source shlib/checks
 

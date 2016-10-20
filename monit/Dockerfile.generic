@@ -1,6 +1,7 @@
-FROM alpine:3.4
+FROM <IMAGE>
 MAINTAINER Marcel Grossmann <whatever4711@gmail.com>
 
+ENV arch <ARCH>
 ENV MONIT_HOME=/etc/monit \
     MONIT_LOG=/var/log/monit \
     PATH=$PATH:/opt/bin
@@ -21,3 +22,8 @@ COPY monit-start.sh ${MONIT_HOME}/
 RUN chmod +x ${MONIT_HOME}/monit-start.sh
 
 ENTRYPOINT ["/bin/bash","-c","${MONIT_HOME}/monit-start.sh"]
+
+LABEL \
+    version=5.17.1 \
+    os="linux" \
+    arch="${arch}"
