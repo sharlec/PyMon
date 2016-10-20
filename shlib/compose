@@ -44,6 +44,8 @@ version: '2'
 volumes:
   static:
     driver: local
+  pgdata:
+    driver: local
 
 networks:
   backend:
@@ -58,6 +60,8 @@ services:
       dockerfile: Dockerfile
     image: postgres
     restart: always
+    volumes:
+      - pgdata:/var/lib/postgresql/data
     expose:
       - 5432
     networks:
