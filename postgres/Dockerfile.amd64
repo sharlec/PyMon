@@ -27,4 +27,4 @@ CMD [ "postgres" ]
 LABEL \
     version=9.5.4 \
     os="linux" \
-    arch="${arch}"
+    arch="${ARCH}"
