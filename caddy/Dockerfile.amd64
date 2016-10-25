@@ -1,7 +1,7 @@
-FROM <IMAGE>
+FROM alpine:3.4
 MAINTAINER Marcel Grossmann <whatever4711@gmail.com>
 
-ENV arch <ARCH>
+ENV arch amd64
 ENV url "https://caddyserver.com/download/build?"
 ENV params "&features=git%2Chugo%2Cipfilter%2Cmailout%2Cprometheus%2Crealip%2Csearch"
 RUN apk add --update --no-cache openssh-client curl git tar
