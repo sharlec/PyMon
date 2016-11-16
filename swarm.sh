@@ -4,7 +4,7 @@ NET='monit_net'
 SHARE_HOST='cubietruck.mg'
 SHARE_DIR='/home/marcel/clouddata/monit'
 SHARE=${SHARE_HOST}:${SHARE_DIR}
-VOLUMES=( 'mont_db' 'monit_www' )
+VOLUMES=( 'monit_db' 'monit_www' )
 declare -a SERVICES
 filename=services.txt
 
@@ -76,7 +76,7 @@ docker service create --name ${collector} --replicas 1 --network ${NET} \
 	--env LISTEN_PORT=8000 \
 	--env DECOUPLE_DB=postgresql://postgres:postgres@192.168.9.3:5433/pymonit \
 	--constraint 'node.hostname==sparrow' \
-	whatever4711/monitcollector:armhf
+	whatever4711/django-monit-collector:armhf
 SERVICES+=("${collector}")
 }
 
