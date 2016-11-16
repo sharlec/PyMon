@@ -8,6 +8,10 @@ VOLUMES=( 'mont_db' 'monit_www' )
 declare -a SERVICES
 filename=services.txt
 
+ADMIN=${ADMIN:-admin}
+PASSWD=${PASSWD:-1234}
+EMAIL=${EMAIL:-"abc@example.com"}
+
 # Requires su rights
 function reset {
 tmp=tmp
@@ -66,6 +70,9 @@ docker service create --name ${collector} --replicas 1 --network ${NET} \
 	--publish 8000:8000 \
 	--mount type=volume,src=${VOLUMES[2]},dst=/usr/src/app/static \
   --mount type=bind,src=${PWD}/src,dst=/usr/src/app \
+  --env ADMIN=${ADMIN} \
+  --env ADMIN_PWD=${PASSWD} \
+  --env EMAIL=${EMAIL} \
 	--env LISTEN_PORT=8000 \
 	--env DECOUPLE_DB=postgresql://postgres:postgres@192.168.9.3:5433/pymonit \
 	--constraint 'node.hostname==sparrow' \
