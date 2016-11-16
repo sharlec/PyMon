@@ -1,0 +1,1 @@
+monit_postgres monit_collector
