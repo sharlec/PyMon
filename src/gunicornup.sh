@@ -14,6 +14,25 @@ python3 manage.py collectstatic --noinput
 
 mkdir -p /var/www/env_projects/pymonit
 
+if [ ! -f "/.created" ]; then
+local current=$PWD
+local tmp_file=admin.py
+cd ${WORKDIR}
+admin_user=${ADMIN:-admin}
+echo ">>> >>> Setting up AdminUser ${admin_user}"
+cat > ${tmp_file} <<-EOM
+from django.contrib.auth.models import User;
+User.objects.create_superuser('${admin_user}', '${EMAIL:-}', '${ADMIN_PWD:-1234}')
+EOM
+
+cat ${tmp_file} | python3 manage.py shell
+rm ${tmp_file}
+touch "/.created"
+cd "${current}"
+fi
+
+
+
 # Prepare log files and start outputting logs to stdout
 touch /usr/src/logs/gunicorn.log
 touch /usr/src/logs/access.log

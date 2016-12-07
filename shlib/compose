@@ -16,6 +16,15 @@ cat <<-EOF
 EOF
 }
 
+function monitcollector_env(){
+cat <<-EOF
+    environment:
+      - ADMIN=${ADMIN}
+      - ADMIN_PWD=${PASSWD}
+      - EMAIL=${EMAIL}
+EOF
+}
+
 function monit() {
   local src="./monit"
   alpine_dockerfile Dockerfile.generic Dockerfile ${src}
@@ -73,7 +82,7 @@ $(monitcollector)
       - static:/usr/src/app/static
     depends_on:
       - db
-    environment:
+$(monitcollector_env)
       - DECOUPLE_DB=postgresql://postgres:postgres@db/pymonit
       - LISTEN_PORT=8000
     expose:
@@ -145,14 +154,14 @@ function start() {
   evaluate_result $? " Started service ${service}"
   docker-compose -f "${yml}" up -d
 
-  if [[ "$created" == "true" ]]; then
-    info "Setting up ${name}"
-    read -r -d '' PYTHON <<-EOM
-from django.contrib.auth.models import User;
-User.objects.create_superuser('${ADMIN}', '${EMAIL}', '${PASSWD}')
-EOM
-    docker exec ${name} /bin/sh -c "echo \"$PYTHON\" | python manage.py shell"
-  fi
+#  if [[ "$created" == "true" ]]; then
+#    info "Setting up ${name}"
+#    read -r -d '' PYTHON <<-EOM
+#from django.contrib.auth.models import User;
+#User.objects.create_superuser('${ADMIN}', '${EMAIL}', '${PASSWD}')
+#EOM
+#    docker exec ${name} /bin/sh -c "echo \"$PYTHON\" | python manage.py shell"
+#fi
   info "To stop the container again execute"
   info "docker-compose down -v"
 }
