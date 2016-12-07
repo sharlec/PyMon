@@ -102,9 +102,9 @@
                 factors:[1,1.e6,1,1.e6],
                 values: [
                     {{system.memory_percent}},
-                    {{system.memory_kilobyte}}/1.e6,
+                    {{system.memory_kilobyte}},
                     {{system.swap_percent}},
-                    {{system.swap_kilobyte}}/1.e6
+                    {{system.swap_kilobyte}}
                 ] //TODO: these {#  { }}#} are django-templates!!!
             }
         };
@@ -114,11 +114,7 @@
             update_period: 1000*{{monit_update_period}}
         };
         var dates = {{system.date}};
-        for (var id in graphs){
-            var graph = graphs[id];
-            graphs[id].graph = createGraph(dates, graph.data, graph.values, options.point_size, options.stroke_width,id, graph.labels);
-        }
-
+        graphs = createGraphs(graphs, dates, options);
         setupRefresh("{% url 'monitcollector.views.load_system_data' server.id %}", graphs, options);
 });
 </script>

@@ -7,9 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-import subprocess
 import requests
-# import socket
 
 import logging
 
@@ -37,6 +35,7 @@ def collector(request):
 
 	collected = collect_data(data)
 	if not collected:
+		log.error("wrong data format")
 		return HttpResponse('wrong data format')
 	return HttpResponse('ok')
 
@@ -60,13 +59,13 @@ def server(request, server_id):
 		processes = server.process_set.all().order_by('name')
 		networks = server.network_set.all().order_by('name')
 		return render(request, 'monitcollector/server.html',
-					  {
-						  'server': server,
-						  'system': system,
-						  'processes': processes,
-						  'monit_update_period': monit_update_period,
-						  'networks': networks
-					  })
+			{
+				'server': server,
+				'system': system,
+				'processes': processes,
+				'monit_update_period': monit_update_period,
+				'networks': networks
+			})
 	except Exception as e:
 		log.exception(e)
 		return render(request, 'monitcollector/dashboard.html', {'server_found': False})
@@ -78,8 +77,13 @@ def process(request, server_id, process_name):
 		server = Server.objects.get(id=server_id)
 		process = server.process_set.get(name=process_name)
 		return render(request, 'monitcollector/process.html',
-					  {'enable_buttons': enable_buttons, 'process_found': True, 'server': server, 'process': process,
-					   'monit_update_period': monit_update_period})
+				{
+					'enable_buttons': enable_buttons,
+					'process_found': True,
+					'server': server,
+					'process': process,
+					'monit_update_period': monit_update_period
+				})
 	except ObjectDoesNotExist:
 		return render(request, 'monitcollector/process.html', {'process_found': False})
 
@@ -100,8 +104,13 @@ def process_action(request, server_id):
 
 		monit_url = 'http://%s:%s@%s:%s/%s' % (monit_user, monit_password, ip_address, monit_port, process_name)
 		requests.post(monit_url, {'action': action}, timeout=time_out)
-		action_labels = {'start': 'starting...', 'stop': 'stopping...', 'restart': 'restarting...',
-						 'unmonitor': 'disable monitoring...', 'monitor': 'enable monitoring...'}
+		action_labels = {
+			'start': 'starting...',
+			'stop': 'stopping...',
+			'restart': 'restarting...',
+			'unmonitor': 'disable monitoring...',
+			'monitor': 'enable monitoring...'
+		}
 		if action in action_labels:
 			process.status = action_labels.get(action)
 			if action == 'unmonitor':
@@ -113,8 +122,13 @@ def process_action(request, server_id):
 			reverse('monitcollector.views.process', kwargs={'server_id': server.id, 'process_name': process_name}))
 	except:
 		return render(request, 'monitcollector/error.html',
-					  {'time_out': time_out, 'monit_user': monit_user, 'ip_address': ip_address,
-					   'monit_port': monit_port, 'process_name': process_name})
+						{
+							'time_out': time_out,
+							'monit_user': monit_user,
+							'ip_address': ip_address,
+							'monit_port': monit_port,
+							'process_name': process_name
+						})
 
 
 @staff_member_required
@@ -143,7 +157,7 @@ def load_system_table(request, server_id):
 	server = Server.objects.get(id=server_id)
 	processes = server.process_set.all().order_by('name')
 	table_html = render_to_string('monitcollector/includes/server_table.html',
-								  {'server': server, 'processes': processes})
+									{'server': server, 'processes': processes})
 	return JsonResponse({'table_html': table_html})
 
 
@@ -206,12 +220,12 @@ def interface(request, server_id, network_name):
 		server = Server.objects.get(id=server_id)
 		network = server.network_set.get(name=network_name)
 		return render(request, 'monitcollector/interface.html',
-					  {
-						  'enable_buttons': enable_buttons,
-						  'process_found': True,
-						  'server': server,
-						  'network': network,
-						  'monit_update_period': monit_update_period
-					  })
+							{
+								'enable_buttons': enable_buttons,
+								'process_found': True,
+								'server': server,
+								'network': network,
+								'monit_update_period': monit_update_period
+							})
 	except ObjectDoesNotExist:
 		return render(request, 'monitcollector/interface.html', {'process_found': False})

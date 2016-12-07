@@ -53,33 +53,40 @@ function setupRefresh(url, graphs, options) {
         });
     }, 2000);
 }
-function createGraph(dates, data_load, values, point_size, stroke_width, elementID, labels) {
+function createGraph(dates, graph, elementID, options) {
     for (var i = 0; i < dates.length; i++) {
         var list = [new Date(dates[i] * 1000.)];
-        for (var j = 0; j < values.length; j++) {
-            list.push(values[j][i])
+        for (var j = 0; j <graph.values.length; j++) {
+            list.push(graph.values[j][i] / graph.factors[j])
         }
-        data_load.push(list);
+        graph.data.push(list);
     }
-    var graph_load = new Dygraph(document.getElementById(elementID), data_load,
+    graph.graph = new Dygraph(document.getElementById(elementID), graph.data,
         {
             legend: 'always', // show always
             labelsDivWidth: '140', // default 250
             labelsSeparateLines: true,
-            ylabel: labels.ylabel,
+            ylabel: graph.labels.ylabel,
             xlabel: 'Time',
             drawPoints: true,
-            pointSize: point_size,
-            strokeWidth: stroke_width,
+            pointSize: options.point_size,
+            strokeWidth: options.stroke_width,
             //showRoller: true,  // for a rolling average over values
-            labels: labels.labels,
+            labels: graph.labels.labels,
             axisLabelColor: '#CCC',
             axisLineColor: '#CCC',
             colors: ["#7FDD00", "#00FFFF", "#DAA520", "#008080"],
             zoomCallback: function () { // (minDate, maxDate)
-                set_linewidth(graph_load, data_load);
-            },
+                set_linewidth(graph.graph, graph.data);
+            }
         });
-    set_linewidth(graph_load, data_load);
-    return graph_load;
+    set_linewidth(graph.graph, graph.data);
+    return graph;
+}
+function createGraphs(graphs, dates, options) {
+    for (var id in graphs){
+            var graph = graphs[id];
+            graphs[id].graph = createGraph(dates, graph, id, options);
+        }
+    return graphs;
 }
