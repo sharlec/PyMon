@@ -57,128 +57,69 @@
 <script src="{% static 'js/jquery-2.1.4.min.js'%}"></script>
 <script src="{% static 'js/dygraph-combined.js'%}"></script>
 <script src="{% static 'js/csrf.js'%}"></script>
-    <script>
-    // smaller points if the data array is too big
-    function set_linewidth(graph ,data) {
-        var range = graph.xAxisRange();
-        var data_points = 0
-        for (var i = 0; i < data.length; i++) {
-          var x = data[i][0];
-          //if (x > minDate && x < maxDate)
-          if (x > range[0] && x < range[1])
-            data_points++;
-        }
-        var new_opts = {};
-        if (data_points > 2000) {
-            new_opts.pointSize = 0.5;
-            new_opts.strokeWidth = 0.33;
-        }
-        else if (data_points > 900) {
-            new_opts.pointSize = 1;
-            new_opts.strokeWidth = 0.5;
-        } else {
-            new_opts.pointSize = 1.5;
-            new_opts.strokeWidth = 1.;
-        }
-        graph.updateOptions(new_opts);
-    }
-    function updateGraph(data, graph, items) {
-        data.push(items);
-        graph.updateOptions({'file': data});
-    }</script>
+<script src="{% static 'js/graphs.js' %}"></script>
 <script>
-    function createGraph(dates, data_load, values, point_size, stroke_width, elementID, labels) {
-        for (var i = 0; i < dates.length; i++){
-            var list = [new Date(dates[i] * 1000.)]
-            for (var j=0; j< values.length; j++){
-                list.push(values[j][i])
-            }
-            //data_load.push([new Date(dates[i] * 1000.), values[0][i], values[1][i], values[2][i]]);
-            data_load.push(list);
-        }
-        var graph_load = new Dygraph(document.getElementById(elementID), data_load,
-                {
-                    legend: 'always', // show always
-                    labelsDivWidth: '140', // default 250
-                    labelsSeparateLines: true,
-                    ylabel: labels.ylabel,
-                    xlabel: 'Time',
-                    drawPoints: true,
-                    pointSize: point_size,
-                    strokeWidth: stroke_width,
-                    //showRoller: true,  // for a rolling average over values
-                    labels: labels.labels,
-                    axisLabelColor: '#CCC',
-                    axisLineColor: '#CCC',
-                    colors: ["#7FDD00", "#00FFFF", "#DAA520", "#008080"],
-                    zoomCallback: function () { // (minDate, maxDate)
-                        set_linewidth(graph_load, data_load);
-                    },
-                });
-        set_linewidth(graph_load, data_load);
-        return graph_load;
-    }
     $(document).ready(function () {
-      var point_size = 1.5;
-      var stroke_width = 1;
-      var update_period = 1000*{{monit_update_period}};
-      var data_load = [];
-      var dates = {{system.date}};
-        var values = [
-            {{system.load_avg01}},
-            {{system.load_avg05}},
-            {{system.load_avg15}}
-        ]; //TODO: these {#  { }}#} are django-templates!!!
-        var elementID="graph_load";
-        var labels={"ylabel":"Load average", "labels":['Time', 'load 1 min', 'load 5 min', 'load 15 min']};
-      var graph_load = createGraph(dates, data_load, values, point_size, stroke_width, elementID, labels);
+        var graphs={
+            "graph_load":{
+                data: [],
+                values: [
+                    {{system.load_avg01}},
+                    {{system.load_avg05}},
+                    {{system.load_avg15}}
+                ], //TODO: these {#  { }}#} are django-templates!!!
+                labels: {
+                    "ylabel":"Load average",
+                    "labels":['Time', 'load 1 min', 'load 5 min', 'load 15 min']
+                },
+                keywords:["load_avg01","load_avg05","load_avg15"],
+                factors:[1,1,1],
+                graph: null
+            },
+            "graph_cpu":{
+                data: [],
+                values: [
+                    {{system.cpu_user}},
+                    {{system.cpu_system}},
+                    {{system.cpu_wait}}
+                ], //TODO: these {#  { }}#} are django-templates!!!
+                labels: {
+                    "ylabel":"CPU usage (in %)",
+                    "labels":['Time', 'user', 'system', 'wait']
+                },
+                keywords:["cpu_user","cpu_system","cpu_wait"],
+                factors:[1,1,1],
+                graph: null
+            },
+            "graph_mem":{
+                data: [],
+                labels: {
+                    "ylabel":"Memory usage (in % or GB)",
+                            "labels":['Time', 'memory in %', 'memory in GB', 'swap in %', 'swap in GB']
+                },
+                graph: null,
+                keywords:["memory_percent","memory_kilobyte","swap_percent","swap_kilobyte"],
+                factors:[1,1.e6,1,1.e6],
+                values: [
+                    {{system.memory_percent}},
+                    {{system.memory_kilobyte}}/1.e6,
+                    {{system.swap_percent}},
+                    {{system.swap_kilobyte}}/1.e6
+                ] //TODO: these {#  { }}#} are django-templates!!!
+            }
+        };
+        var options= {
+            point_size: 1.5,
+            stroke_width: 1,
+            update_period: 1000*{{monit_update_period}}
+        };
+        var dates = {{system.date}};
+        for (var id in graphs){
+            var graph = graphs[id];
+            graphs[id].graph = createGraph(dates, graph.data, graph.values, options.point_size, options.stroke_width,id, graph.labels);
+        }
 
-      var data_cpu = [];
-      values = [
-          {{system.cpu_user}},
-          {{system.cpu_system}},
-          {{system.cpu_wait}}
-      ];
-        elementID="graph_cpu";
-        labels={"ylabel":"CPU usage (in %)", "labels":['Time', 'user', 'system', 'wait']};
-      var graph_cpu = createGraph(dates, data_cpu, values, point_size, stroke_width, elementID, labels);
-
-      var data_mem = [];
-      values = [
-          {{system.memory_percent}},
-          {{system.memory_kilobyte}}/1.e6,
-          {{system.swap_percent}},
-      {{system.swap_kilobyte}}/1.e6
-      ];
-        elementID="graph_mem";
-        labels={"ylabel":"Memory usage (in % or GB)", "labels":['Time', 'memory in %', 'memory in GB', 'swap in %', 'swap in GB']};
-      var graph_mem = createGraph(dates, data_mem, values, point_size, stroke_width, elementID, labels);
-
-     function setupRefresh() {
-         window.intervalId = setInterval(function () {
-             $.post("{% url 'monitcollector.views.load_system_data' server.id %}", function (data) {
-                 var date = new Date(JSON.parse(data.date) * 1000.);
-                 if (date > data_cpu[data_cpu.length - 1][0]) {
-                     updateGraph(data_load, graph_load, [date, JSON.parse(data.load_avg01), JSON.parse(data.load_avg05), JSON.parse(data.load_avg15)]);
-
-                     updateGraph(data_cpu, graph_cpu, [date, JSON.parse(data.cpu_user), JSON.parse(data.cpu_system), JSON.parse(data.cpu_wait)]);
-
-                     updateGraph(data_mem, graph_mem, [date, JSON.parse(data.memory_percent), JSON.parse(data.memory_kilobyte) / 1.e6, JSON.parse(data.swap_percent), JSON.parse(data.swap_kilobyte) / 1.e6]);
-
-                     $("#server_table").replaceWith(data.table_html);
-                 }
-             });
-         }, update_period);
-         window.intervalId = setInterval(function () {
-             $.post("{% url 'monitcollector.views.load_system_table' server.id %}", function (data) {
-                 $("#server_table").replaceWith(data.table_html);
-             });
-         }, 2000);
-     }
-
-     setupRefresh();
-
-
+        setupRefresh("{% url 'monitcollector.views.load_system_data' server.id %}", graphs, options);
 });
 </script>
 {% csrf_token %}
