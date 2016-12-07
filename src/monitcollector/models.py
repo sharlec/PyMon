@@ -3,6 +3,9 @@ import xml.etree.ElementTree as ET
 import json
 import time
 from django.conf import settings
+import logging
+
+log = logging.getLogger(__name__)
 
 monit_update_period = getattr(settings, 'MONIT_UPDATE_PERIOD', 60)
 maximum_store_days = getattr(settings, 'MAXIMUM_STORE_DAYS', 7)
@@ -116,7 +119,7 @@ def remove_old_services(server, service_list):
 
 
 def get_float(tree, xpath) -> float:
-    float(tree.find(xpath).text)
+    return float(tree.find(xpath).text)
 
 
 class Server(models.Model):
@@ -132,6 +135,7 @@ class Server(models.Model):
         root = tree.find('.[@id]')
         monit_id = root.get('id')
         server, created = cls.objects.get_or_create(monit_id=monit_id)
+        #log.info("created server: "+created)
         server.monit_version = root.get("version")
         server.localhostname = root.find('./server/localhostname').text
         server.uptime = root.find('./server/uptime').text
@@ -140,7 +144,7 @@ class Server(models.Model):
         Platform.update(root, server)
         for service in root.findall('./services/service'):
             service_type = service.find("type").text
-            service_name = service.find("type").text
+            service_name = service.get("name")
             reporting_services.append(service_name)
             # properties for type=5 (system)
             if service_type == '5':
@@ -223,7 +227,7 @@ class System(Service):
         system.monitor = service.find("monitor").text
         system.monitormode = service.find("monitormode").text
         system.pendingaction = service.find("pendingaction").text
-        if not service.find("system/load/avg01") is None:
+        if not service.find("system") is None:
             system.date_last = int(time.time())
             system.date = json_list_append(system.date, system.date_last)
 
@@ -299,19 +303,30 @@ class Network(Service):
     speed = models.IntegerField(null=True)
     duplex= models.IntegerField(null=True)       # TODO: boolean?
 
-    download_packets_now = models.IntegerField(null=True)
-    download_packets_total = models.IntegerField(null=True)
-    download_bytes_now = models.IntegerField(null=True)
-    download_bytes_total = models.IntegerField(null=True)
-    download_errors_now = models.IntegerField(null=True)
-    download_errors_total = models.IntegerField(null=True)
-
-    upload_packets_now = models.IntegerField(null=True)
-    upload_packets_total = models.IntegerField(null=True)
-    upload_bytes_now = models.IntegerField(null=True)
-    upload_bytes_total = models.IntegerField(null=True)
-    upload_errors_now = models.IntegerField(null=True)
-    upload_errors_total = models.IntegerField(null=True)
+    download_packets_now_last = models.IntegerField(null=True)
+    download_packets_now = models.TextField(null=True)
+    download_packets_total_last = models.IntegerField(null=True)
+    download_packets_total = models.TextField(null=True)
+    download_bytes_now_last = models.IntegerField(null=True)
+    download_bytes_now = models.TextField(null=True)
+    download_bytes_total_last = models.IntegerField(null=True)
+    download_bytes_total = models.TextField(null=True)
+    download_errors_now_last = models.IntegerField(null=True)
+    download_errors_now = models.TextField(null=True)
+    download_errors_total_last = models.IntegerField(null=True)
+    download_errors_total = models.TextField(null=True)
+    upload_packets_now_last = models.IntegerField(null=True)
+    upload_packets_now = models.TextField(null=True)
+    upload_packets_total_last = models.IntegerField(null=True)
+    upload_packets_total = models.TextField(null=True)
+    upload_bytes_now_last = models.IntegerField(null=True)
+    upload_bytes_now = models.TextField(null=True)
+    upload_bytes_total_last = models.IntegerField(null=True)
+    upload_bytes_total = models.TextField(null=True)
+    upload_errors_now_last = models.IntegerField(null=True)
+    upload_errors_now = models.TextField(null=True)
+    upload_errors_total_last = models.IntegerField(null=True)
+    upload_errors_total = models.TextField(null=True)
 
     @classmethod
     def update(cls, service, server):
@@ -323,22 +338,41 @@ class Network(Service):
         network.monitormode = service.find("monitormode").text
         network.pendingaction = service.find("pendingaction").text
 
-        if not service.find("link/state") is None:
+        if not service.find("link") is None:
             network.state = service.find('link/state').text
             network.speed = service.find('link/speed').text
             network.duplex = service.find('link/duplex').text
-            network.download_packets_now = service.find('link/download/packets/now').text
-            network.download_packets_total = service.find('link/download/packets/total').text
-            network.download_bytes_now = service.find('link/download/bytes/now').text
-            network.download_bytes_total = service.find('link/download/bytes/total').text
-            network.download_errors_now = service.find('link/download/errors/now').text
-            network.download_errors_total = service.find('link/download/errors/total').text
-            network.upload_packets_now = service.find('link/upload/packets/now').text
-            network.upload_packets_total = service.find('link/upload/packets/total').text
-            network.upload_bytes_now = service.find('link/upload/bytes/now').text
-            network.upload_bytes_total = service.find('link/upload/bytes/total').text
-            network.upload_errors_now = service.find('link/upload/errors/now').text
-            network.upload_errors_total = service.find('link/upload/errors/total').text
+            network.download_packets_now_last = service.find('link/download/packets/now').text
+            network.download_packets_now = json_list_append(network.download_packets_now,
+                                                            network.download_packets_now_last)
+            network.download_packets_total_last = service.find('link/download/packets/total').text
+            network.download_packets_total = json_list_append(network.download_packets_total,
+                                                              network.download_packets_total_last)
+            network.download_bytes_now_last = service.find('link/download/bytes/now').text
+            network.download_bytes_now = json_list_append(network.download_bytes_now, network.download_bytes_now_last)
+            network.download_bytes_total_last = service.find('link/download/bytes/total').text
+            network.download_bytes_total = json_list_append(network.download_bytes_total,
+                                                            network.download_bytes_total_last)
+            network.download_errors_now_last = service.find('link/download/errors/now').text
+            network.download_errors_now = json_list_append(network.download_errors_now,
+                                                           network.download_errors_now_last)
+            network.download_errors_total_last = service.find('link/download/errors/total').text
+            network.download_errors_total = json_list_append(network.download_errors_total,
+                                                             network.download_errors_total_last)
+            network.upload_packets_now_last = service.find('link/upload/packets/now').text
+            network.upload_packets_now = json_list_append(network.upload_packets_now, network.upload_packets_now_last)
+            network.upload_packets_total_last = service.find('link/upload/packets/total').text
+            network.upload_packets_total = json_list_append(network.upload_packets_total,
+                                                            network.upload_packets_total_last)
+            network.upload_bytes_now_last = service.find('link/upload/bytes/now').text
+            network.upload_bytes_now = json_list_append(network.upload_bytes_now, network.upload_bytes_now_last)
+            network.upload_bytes_total_last = service.find('link/upload/bytes/total').text
+            network.upload_bytes_total = json_list_append(network.upload_bytes_total, network.upload_bytes_total_last)
+            network.upload_errors_now_last = service.find('link/upload/errors/now').text
+            network.upload_errors_now = json_list_append(network.upload_errors_now, network.upload_errors_now_last)
+            network.upload_errors_total_last = service.find('link/upload/errors/total').text
+            network.upload_errors_total = json_list_append(network.upload_errors_total,
+                                                           network.upload_errors_total_last)
 
         network.save()
 
