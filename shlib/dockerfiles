@@ -1,8 +1,8 @@
 #!/bin/sh
 
-ALPINE_64="alpine:3.4"
+ALPINE_64="alpine:edge"
 PYTHON_64="python:3.5-alpine"
-ALPINE_ARM="armhf/alpine:3.4"
+ALPINE_ARM="armhf/alpine:edge"
 PYTHON_ARM="armhf/python:3.5-alpine"
 
 function alpine_dockerfile() {
