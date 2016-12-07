@@ -298,6 +298,7 @@ class Process(Service):
 
 
 class Network(Service):
+    # TODO: history of these fields?
     server = models.ForeignKey(Server)
     state = models.IntegerField(null=True)
     speed = models.IntegerField(null=True)
@@ -359,6 +360,7 @@ class Network(Service):
             network.download_errors_total_last = service.find('link/download/errors/total').text
             network.download_errors_total = json_list_append(network.download_errors_total,
                                                              network.download_errors_total_last)
+
             network.upload_packets_now_last = service.find('link/upload/packets/now').text
             network.upload_packets_now = json_list_append(network.upload_packets_now, network.upload_packets_now_last)
             network.upload_packets_total_last = service.find('link/upload/packets/total').text
@@ -373,7 +375,6 @@ class Network(Service):
             network.upload_errors_total_last = service.find('link/upload/errors/total').text
             network.upload_errors_total = json_list_append(network.upload_errors_total,
                                                            network.upload_errors_total_last)
-
         network.save()
 
 #

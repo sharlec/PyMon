@@ -11,6 +11,10 @@ import subprocess
 import requests
 # import socket
 
+import logging
+
+log = logging.getLogger(__name__)
+
 from monitcollector.models import collect_data, Server, Process, System
 
 monit_update_period = getattr(settings, 'MONIT_UPDATE_PERIOD', 60)
@@ -63,7 +67,8 @@ def server(request, server_id):
 						  'monit_update_period': monit_update_period,
 						  'networks': networks
 					  })
-	except:
+	except Exception as e:
+		log.exception(e)
 		return render(request, 'monitcollector/dashboard.html', {'server_found': False})
 
 
@@ -153,15 +158,27 @@ def load_system_data(request, server_id):
 	server = Server.objects.get(id=server_id)
 	system = server.system
 	processes = server.process_set.all().order_by('name')
-	table_html = render_to_string('monitcollector/includes/server_table.html',
-								  {'server': server, 'processes': processes})
-	data = {'table_html': table_html, 'date': system.date_last, 'load_avg01': system.load_avg01_last,
-			'load_avg05': system.load_avg05_last, 'load_avg15': system.load_avg15_last,
-			'cpu_user': system.cpu_user_last,
-			'cpu_system': system.cpu_system_last, 'cpu_wait': system.cpu_wait_last,
-			'memory_percent': system.memory_percent_last,
-			'memory_kilobyte': system.memory_kilobyte_last, 'swap_percent': system.swap_percent_last,
-			'swap_kilobyte': system.swap_kilobyte_last}
+	table_html = render_to_string(
+		'monitcollector/includes/server_table.html',
+		{
+			'server': server,
+			'processes': processes
+		}
+	)
+	data = {
+		'table_html': table_html,
+		'date': system.date_last,
+		'load_avg01': system.load_avg01_last,
+		'load_avg05': system.load_avg05_last,
+		'load_avg15': system.load_avg15_last,
+		'cpu_user': system.cpu_user_last,
+		'cpu_system': system.cpu_system_last,
+		'cpu_wait': system.cpu_wait_last,
+		'memory_percent': system.memory_percent_last,
+		'memory_kilobyte': system.memory_kilobyte_last,
+		'swap_percent': system.swap_percent_last,
+		'swap_kilobyte': system.swap_kilobyte_last
+	}
 	return JsonResponse(data)
 
 
