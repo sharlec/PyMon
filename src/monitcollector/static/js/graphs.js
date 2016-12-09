@@ -85,8 +85,7 @@ function createGraph(dates, graph, elementID, options) {
 }
 function createGraphs(graphs, dates, options) {
     for (var id in graphs){
-            var graph = graphs[id];
-            graphs[id].graph = createGraph(dates, graph, id, options);
+            createGraph(dates, graphs[id], id, options);
         }
     return graphs;
 }

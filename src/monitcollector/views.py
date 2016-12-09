@@ -58,6 +58,7 @@ def server(request, server_id):
 		system = server.system
 		processes = server.process_set.all().order_by('name')
 		networks = server.network_set.all().order_by('name')
+		log.error(networks)
 		return render(request, 'monitcollector/server.html',
 			{
 				'server': server,

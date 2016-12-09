@@ -38,6 +38,22 @@
   </div>
 </div>
 
+<div class="row clearfix">
+  <div class="col-md-12 column">
+    <p class="helper">Zoom: click-drag --- Pan: shift-click-drag --- Restore zoom level: double-click</p>
+
+    <div class="col-lg-4 col-md-6 column">
+      <div id="graph_download" class="graph" style="width:100%;"></div>
+    </div>
+    <div class="col-lg-4 col-md-6 column">
+      <!--div id="graph_cpu" class="graph" style="width:100%;"></div-->
+    </div>
+    <div class="col-lg-4 col-md-6 column">
+      <!--div id="graph_mem" class="graph" style="width:100%;"></div-->
+    </div>
+  </div>
+</div>
+
 <div class="row clearfix marginTop">
   <div class="col-md-12 column">
     <div id="network_table" class="table-responsive">
@@ -105,6 +121,20 @@
                     {{system.memory_kilobyte}},
                     {{system.swap_percent}},
                     {{system.swap_kilobyte}}
+                ] //TODO: these {#  { }}#} are django-templates!!!
+            },
+            "graph_download":{
+                data: [],
+                labels: {
+                    "ylabel":"network usage",
+                            "labels":['Time', 'download_bytes_total', 'download_bytes_now']
+                },
+                graph: null,
+                keywords:["download_bytes_total","download_bytes_now"],
+                factors:[1.e6,1.e6],
+                values: [
+                    {{networks.0.download_bytes_total}},
+                    {{networks.0.download_bytes_now}}
                 ] //TODO: these {#  { }}#} are django-templates!!!
             }
         };

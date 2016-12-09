@@ -122,6 +122,10 @@ def get_float(tree, xpath) -> float:
     return float(tree.find(xpath).text)
 
 
+def get_int(tree, xpath) -> int:
+    return int(tree.find(xpath).text)
+
+
 class Server(models.Model):
     monit_id = models.CharField(max_length=32, unique=True)
     monit_version = models.TextField(null=True)
@@ -340,41 +344,41 @@ class Network(Service):
         network.pendingaction = service.find("pendingaction").text
 
         if not service.find("link") is None:
-            network.state = service.find('link/state').text
-            network.speed = service.find('link/speed').text
-            network.duplex = service.find('link/duplex').text
-            network.download_packets_now_last = service.find('link/download/packets/now').text
+            network.state = get_int(service, 'link/state')
+            network.speed = get_int(service, 'link/speed')
+            network.duplex = get_int(service, 'link/duplex')
+            network.download_packets_now_last = get_int(service, 'link/download/packets/now')
             network.download_packets_now = json_list_append(network.download_packets_now,
                                                             network.download_packets_now_last)
-            network.download_packets_total_last = service.find('link/download/packets/total').text
+            network.download_packets_total_last = get_int(service, 'link/download/packets/total')
             network.download_packets_total = json_list_append(network.download_packets_total,
                                                               network.download_packets_total_last)
-            network.download_bytes_now_last = service.find('link/download/bytes/now').text
+            network.download_bytes_now_last = get_int(service, 'link/download/bytes/now')
             network.download_bytes_now = json_list_append(network.download_bytes_now, network.download_bytes_now_last)
-            network.download_bytes_total_last = service.find('link/download/bytes/total').text
+            network.download_bytes_total_last = get_int(service, 'link/download/bytes/total')
             network.download_bytes_total = json_list_append(network.download_bytes_total,
                                                             network.download_bytes_total_last)
-            network.download_errors_now_last = service.find('link/download/errors/now').text
+            network.download_errors_now_last = get_int(service, 'link/download/errors/now')
             network.download_errors_now = json_list_append(network.download_errors_now,
                                                            network.download_errors_now_last)
-            network.download_errors_total_last = service.find('link/download/errors/total').text
+            network.download_errors_total_last = get_int(service, 'link/download/errors/total')
             network.download_errors_total = json_list_append(network.download_errors_total,
                                                              network.download_errors_total_last)
-
-            network.upload_packets_now_last = service.find('link/upload/packets/now').text
+            network.upload_packets_now_last = get_int(service, 'link/upload/packets/now')
             network.upload_packets_now = json_list_append(network.upload_packets_now, network.upload_packets_now_last)
-            network.upload_packets_total_last = service.find('link/upload/packets/total').text
+            network.upload_packets_total_last = get_int(service, 'link/upload/packets/total')
             network.upload_packets_total = json_list_append(network.upload_packets_total,
                                                             network.upload_packets_total_last)
-            network.upload_bytes_now_last = service.find('link/upload/bytes/now').text
+            network.upload_bytes_now_last = get_int(service, 'link/upload/bytes/now')
             network.upload_bytes_now = json_list_append(network.upload_bytes_now, network.upload_bytes_now_last)
-            network.upload_bytes_total_last = service.find('link/upload/bytes/total').text
+            network.upload_bytes_total_last = get_int(service, 'link/upload/bytes/total')
             network.upload_bytes_total = json_list_append(network.upload_bytes_total, network.upload_bytes_total_last)
-            network.upload_errors_now_last = service.find('link/upload/errors/now').text
+            network.upload_errors_now_last = get_int(service, 'link/upload/errors/now')
             network.upload_errors_now = json_list_append(network.upload_errors_now, network.upload_errors_now_last)
-            network.upload_errors_total_last = service.find('link/upload/errors/total').text
+            network.upload_errors_total_last = get_int(service, 'link/upload/errors/total')
             network.upload_errors_total = json_list_append(network.upload_errors_total,
                                                            network.upload_errors_total_last)
+
         network.save()
 
 #
