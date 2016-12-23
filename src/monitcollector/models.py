@@ -96,6 +96,8 @@ def decode_status(status):
 
 
 def json_list_append(json_list, value):
+    log.debug("append "+str(value)+" to " +str(json_list))
+    log.info("test")
     try:
         new_list = json.loads(json_list)
         new_list.append(value)
@@ -125,6 +127,27 @@ def get_float(tree, xpath) -> float:
 def get_int(tree, xpath) -> int:
     return int(tree.find(xpath).text)
 
+
+def parse_docker_json(xmltree):
+    output = xmltree.find("program/output").text
+    struct = json.loads(output)
+    containers = []
+    for i in struct['containers']:
+        containers.append({
+            "name": i["Names"][0],
+            "id": i["Id"],
+            "state": i["State"],
+            "status": i["Status"]
+        })
+    for i in struct['stats']:
+        stat_id = i["id"]
+        for c in containers:
+            if c["id"].startswith(stat_id):
+                c["stats"] = {
+                    "memory": i["stats"]["memory_stats"]["usage"],
+                    "cpu": i["stats"]["cpu_stats"]["cpu_usage"]["total_usage"]
+                }
+    return containers
 
 class Server(models.Model):
     monit_id = models.CharField(max_length=32, unique=True)
@@ -259,6 +282,31 @@ class System(Service):
         system.save()
 
 
+class Container(models.Model):
+    process = models.ForeignKey("Process")
+    name = models.TextField()
+
+    cpu_last = models.IntegerField(null=True)
+    cpu = models.TextField(null=True)
+    memory_last = models.IntegerField(null=True)
+    memory = models.TextField(null=True)
+
+    @classmethod
+    def update(cls, stat, process):
+        container_id = stat['id']
+        log.warn("add container "+str(container_id))
+        container, created = cls.objects.get_or_create(process=process, name=container_id)
+        container.cpu_last = stat['stats']['cpu']
+        container.memory_last = stat['stats']['memory']
+        container.cpu = json_list_append(container.cpu, container.cpu_last)
+        container.memory = json_list_append(container.memory, container.memory_last)
+        container.save()
+        log.warn("done with "+str(container_id))
+
+
+
+
+
 # we call everything else a Process, not only type=3
 class Process(Service):
     server = models.ForeignKey('Server')
@@ -298,6 +346,16 @@ class Process(Service):
             process.memory_percenttotal = json_list_append(process.memory_percenttotal, process.memory_percenttotal_last)
             process.memory_kilobytetotal_last = int(get_float(service, './/memory/kilobytetotal'))
             process.memory_kilobytetotal = json_list_append(process.memory_kilobytetotal, process.memory_kilobytetotal_last)
+        if "docker-containers" in service_name and not service.find("program/output") is None:
+            log.error("upate docker containers")
+            stats = parse_docker_json(service)
+            log.error(len(stats))
+            log.error(stats)
+            for s in stats:
+                log.error(s)
+                Container.update(s, process)
+        else:
+            log.error("no docker containers "+str(service_name))
         process.save()
 
 
