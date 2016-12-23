@@ -13,3 +13,11 @@ check process monit with pidfile /var/run/monit.pid
 check network eth0 with interface eth0
 # Checks space and inode usage
 #check filesystem mmcblk0 with path /
+
+set limits {
+	programOutput: 1 MB	# http::/containers/json returns already 4kB with just 3 containers running
+}
+
+# list docker containers
+check program docker-containers with path /etc/monit/docker-containers.sh
+	if status != 0 then alert

@@ -6,7 +6,7 @@ ENV MONIT_HOME=/etc/monit \
     MONIT_LOG=/var/log/monit \
     PATH=$PATH:/opt/bin
 
-RUN apk add --update monit bash && \
+RUN apk add --update monit bash curl jq && \
     mkdir -p ${MONIT_LOG}
 
 RUN mkdir -p ${MONIT_HOME} && \
@@ -24,6 +24,6 @@ RUN chmod +x ${MONIT_HOME}/monit-start.sh
 ENTRYPOINT ["/bin/bash","-c","${MONIT_HOME}/monit-start.sh"]
 
 LABEL \
-    version=5.17.1 \
+    version=5.20.0-r2 \
     os="linux" \
     arch="${arch}"
