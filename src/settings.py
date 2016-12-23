@@ -110,3 +110,30 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters':{
+        'simple':{
+            'format': "[%(levelname)s] %(asctime)s %(message)s",
+            'datefmt': "%H:%m:%S"
+        }
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter':'simple',
+        }},
+    'loggers': {
+            'django':{
+                'handlers': ['console'],
+                'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+                'propagate': True,
+            },
+            'monitcollector': {
+                'handlers': ['console'],
+                'level': 'INFO',
+            }
+        }
+}
