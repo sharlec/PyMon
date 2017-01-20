@@ -4,6 +4,7 @@ import threading
 import time
 import logging
 from flask import Flask
+from statistics import mean
 
 log = logging.getLogger(__name__)
 app = Flask(__name__)
@@ -11,11 +12,43 @@ app = Flask(__name__)
 containers = {}
 thread_map = {}
 
+
+#monitcollector.models
+def container_cpu_percent(stats):
+    container_cpu = stats["cpu_stats"]["cpu_usage"]["total_usage"]
+    pre_container_cpu = stats["precpu_stats"]["cpu_usage"]["total_usage"]
+    system_cpu = stats["cpu_stats"]["system_cpu_usage"]
+    pre_system_cpu = stats["precpu_stats"]["system_cpu_usage"]
+    cpu = ((container_cpu - pre_container_cpu) / (system_cpu - pre_system_cpu)) * 100
+    log.debug("((%f - %f) / (%f - %f)) * 100 = %f", container_cpu, pre_container_cpu, system_cpu, pre_system_cpu, cpu)
+    return cpu
+
+
+
 class StatThread(threading.Thread):
 	def __init__(self, container):
 		threading.Thread.__init__(self)
 		self.id = container
 		self.active = True
+		self.__metrics = ("cpu","memory") #TODO network
+		self.history = {} # TODO: synchronize?
+		self.init_history()
+		
+	def init_history(self):
+		for m in self.__metrics:
+			self.history[m] = []
+	
+	def update_stats(self, data):
+		old = containers[self.id]["stats"]
+		new = {
+			"cpu": container_cpu_percent(data),
+			"memory": data["memory_stats"]["usage"]
+		}
+		for m in self.__metrics:
+			self.history[m].append(new[m])
+			log.warn("history: "+str(len(self.history[m])))
+			new[m] = mean(self.history[m])
+		containers[self.id]["stats"] = new
 	
 	def run(self):
 		with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as sock:
@@ -31,7 +64,7 @@ class StatThread(threading.Thread):
 					if len(content) > 1:
 						data = json.loads(content)
 						log.info("{}: {}".format(self.id[0:12], len(data)))
-						containers[self.id]["stats"] = data['read']
+						self.update_stats(data)
 				except socket.timeout:
 					log.error("container {} timed out".format(self.id[0:12]))
 					self.active = False
@@ -83,14 +116,24 @@ def update_containers():
 			containers[nc] = new_containers[nc]
 	manage_stat_threads()
 
-@app.route("/")
-def get_stats():
+def update():
 	update_containers()
 	data = dict(containers)
 	for c in data:
 		if not c in thread_map or not thread_map[c].active:
 			containers.pop(c)
-	return json.dumps(data,indent=4)
+	for t in thread_map:
+		thread_map[t].init_history()
+	return data
+
+@app.route("/")
+def get_stats():
+	#TODO: reset stats? ( -> t.__init_history__ )
+	return json.dumps(update())
+
+@app.route("/pretty")
+def pretty():
+	return json.dumps(update(), indent=4, sort_keys=True)
 
 def shutdown():
 	for t in thread_map:
