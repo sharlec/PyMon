@@ -16,7 +16,7 @@ thread_map = {}
 
 """
 Provide an HTTP-endpoint (/) to get preprocessed data from the Docker API.
-The main thread handles HTTP with Flask, and coordinates Docker API consuming helper threads.
+The main thread handles HTTP (basic server reduces size), and coordinates Docker API consuming helper threads.
 The helper threads connect to docker.sock, register for the stats-Stream of a container, and collect some information.
 Metric data is stored and the mean of them is used on the endpoint.
 Helper and main threads share the global "containers" with all metrics (but not the history).
@@ -25,6 +25,8 @@ When a stream times out, the helper stops.
 calling the endpoint empties the history, adds new containers (creates helper threads), and removes stale containers (without helper thread, or stop helper thread).
 
 Pretty-printed JSON is available under /pretty, without resetting history, but with addind and removing containers/threads
+
+Using docker-py (https://github.com/docker/docker-py) would be quite nice, but stopping stale threads would be harder (generator without timeout; for-loop)
 """
 
 #monitcollector.models
@@ -60,7 +62,7 @@ class StatThread(threading.Thread):
 		}
 		for m in self.__metrics:
 			self.history[m].append(new[m])
-			log.warn("history: "+str(len(self.history[m])))
+			log.warn(m[1]+" history: "+str(len(self.history[m])) + " current: "+str(new[m]))
 			new[m] = statistics.mean(self.history[m])
 		containers[self.id]["stats"] = new
 	
@@ -100,6 +102,7 @@ def iterate_containers():
 			containers[meta["Id"]] = {
 				"name": meta["Names"][0],
 				"id": meta["Id"],
+				"ip": meta["NetworkSettings"]["Networks"]["bridge"]["IPAddress"],
 				"image": meta["Image"],
 				"state": meta["State"],
 				"status": meta["Status"],
@@ -169,9 +172,13 @@ if __name__ == "__main__":
 	logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 	update_containers()
 	try:
+		log.info("start server")
 		httpd=socketserver.TCPServer(("", PORT), StatHandler)
 		httpd.serve_forever()
-	except:
+	except KeyboardInterrupt:
+		log.info("shutdown requested")
 		httpd.socket.close()
+	log.info("initiate shutdown")
 	shutdown()
+	log.info("wait for threads...")
 
