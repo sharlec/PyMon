@@ -3,15 +3,29 @@ import json
 import threading
 import time
 import logging
-from flask import Flask
-from statistics import mean
+import statistics
+import socketserver
+import http.server
 
 log = logging.getLogger(__name__)
-app = Flask(__name__)
+
+PORT=5000
 
 containers = {}
 thread_map = {}
 
+"""
+Provide an HTTP-endpoint (/) to get preprocessed data from the Docker API.
+The main thread handles HTTP with Flask, and coordinates Docker API consuming helper threads.
+The helper threads connect to docker.sock, register for the stats-Stream of a container, and collect some information.
+Metric data is stored and the mean of them is used on the endpoint.
+Helper and main threads share the global "containers" with all metrics (but not the history).
+When a stream times out, the helper stops.
+
+calling the endpoint empties the history, adds new containers (creates helper threads), and removes stale containers (without helper thread, or stop helper thread).
+
+Pretty-printed JSON is available under /pretty, without resetting history, but with addind and removing containers/threads
+"""
 
 #monitcollector.models
 def container_cpu_percent(stats):
@@ -47,14 +61,14 @@ class StatThread(threading.Thread):
 		for m in self.__metrics:
 			self.history[m].append(new[m])
 			log.warn("history: "+str(len(self.history[m])))
-			new[m] = mean(self.history[m])
+			new[m] = statistics.mean(self.history[m])
 		containers[self.id]["stats"] = new
 	
 	def run(self):
 		with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as sock:
 			sock.connect("/var/run/docker.sock")
 			sock.send(bytes("GET /containers/{id}/stats HTTP/1.0\r\n\n".format(id=self.id),'utf8'))
-			sock.settimeout(5)
+			sock.settimeout(5) #TODO an active container should have an update about every second
 			while(self.active):
 				try:
 					raw = sock.recv(16048) #TODO: basic containers have around 2000 bytes
@@ -86,6 +100,7 @@ def iterate_containers():
 			containers[meta["Id"]] = {
 				"name": meta["Names"][0],
 				"id": meta["Id"],
+				"image": meta["Image"],
 				"state": meta["State"],
 				"status": meta["Status"],
 				"stats": {}
@@ -116,32 +131,47 @@ def update_containers():
 			containers[nc] = new_containers[nc]
 	manage_stat_threads()
 
-def update():
+def update(reset=True):
 	update_containers()
 	data = dict(containers)
 	for c in data:
 		if not c in thread_map or not thread_map[c].active:
 			containers.pop(c)
-	for t in thread_map:
-		thread_map[t].init_history()
+	if reset:
+		for t in thread_map:
+			thread_map[t].init_history()
 	return data
 
-@app.route("/")
 def get_stats():
-	#TODO: reset stats? ( -> t.__init_history__ )
 	return json.dumps(update())
 
-@app.route("/pretty")
 def pretty():
-	return json.dumps(update(), indent=4, sort_keys=True)
+	return json.dumps(update(False), indent=4, sort_keys=True)
 
 def shutdown():
 	for t in thread_map:
 		thread_map[t].active=False
 
+
+class StatHandler(http.server.BaseHTTPRequestHandler):
+	def do_GET(self):
+		self.send_response(200)
+		self.send_header("Content-Type","application/json")
+		self.end_headers()
+		if "pretty" in self.path:
+			content= pretty()
+		else:
+			content = get_stats()
+		self.wfile.write(bytes(content,'utf8'))
+		return
+
 if __name__ == "__main__":
 	logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 	update_containers()
-	app.run()
+	try:
+		httpd=socketserver.TCPServer(("", PORT), StatHandler)
+		httpd.serve_forever()
+	except:
+		httpd.socket.close()
 	shutdown()
 
