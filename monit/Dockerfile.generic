@@ -37,7 +37,7 @@ RUN mkdir -p ${MONIT_HOME}/monitrc.d && \
 	echo "	if status != 0 then alert" >> ${MONIT_HOME}/monitrc.d/docker
 
 COPY monit-start.sh ${MONIT_HOME}/
-COPY docker-sock.py ${MONIT_HOME}/
+COPY docker-sock.py ${APY_HOME}/
 RUN chmod +x ${MONIT_HOME}/monit-start.sh && \
 	chmod +x ${APY_HOME}/docker-sock.py
 
