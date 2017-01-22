@@ -1,0 +1,30 @@
+{% load monitcollector_tags %}
+<div id="process_table" class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <td>id</td>
+          <td>name</td>
+          <td>status</td> 
+          <td>state</td>
+          <td>image</td>
+          <td>CPU</td>
+          <td>memory</td>
+        </tr>
+      </thead>
+      <tbody>
+      {% for container in containers %}
+        <tr>
+          <td>{{ container.docker_id|slice:":12" }}</td>
+          <td>{{ container.name }}</td>
+            <td>{{ container.status}}</td>
+            <td>{{ container.state}}</td>
+            <td>{{ container.image}}</td>
+          <td>{{ container.cpu_last|percent }}</td>
+          <td>{{ container.memory_last }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+</div>
+

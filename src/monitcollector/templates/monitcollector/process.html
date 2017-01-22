@@ -34,6 +34,13 @@
      {% include "monitcollector/includes/process_table.html" %}
   </div>
 </div>
+    {%  if containers %}
+<div class="row clearfix marginTop">
+  <div class="col-md-12 column">
+     {% include "monitcollector/includes/container_table.html" %}
+  </div>
+</div>
+        {% endif %}
 <div class="row clearfix">
 {% if enable_buttons %}
         {% include "monitcollector/includes/process_buttons.html" %}

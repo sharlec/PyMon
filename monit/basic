@@ -18,6 +18,4 @@ set limits {
 	programOutput: 1 MB	# http::/containers/json returns already 4kB with just 3 containers running
 }
 
-# list docker containers
-check program docker-containers with path /etc/monit/docker-containers.sh
-	if status != 0 then alert
+

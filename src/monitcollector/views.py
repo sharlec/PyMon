@@ -77,14 +77,18 @@ def process(request, server_id, process_name):
 	try:
 		server = Server.objects.get(id=server_id)
 		process = server.process_set.get(name=process_name)
-		return render(request, 'monitcollector/process.html',
-				{
+		containers = process.container_set.all()
+		context = {
 					'enable_buttons': enable_buttons,
 					'process_found': True,
 					'server': server,
 					'process': process,
 					'monit_update_period': monit_update_period
-				})
+				}
+		if len(containers)>0:
+			context["containers"] = containers
+		return render(request, 'monitcollector/process.html',
+				context)
 	except ObjectDoesNotExist:
 		return render(request, 'monitcollector/process.html', {'process_found': False})
 
