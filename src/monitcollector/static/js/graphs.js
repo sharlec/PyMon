@@ -31,6 +31,7 @@ function updateGraph(data, graph, items) {
 }
 
 function setupRefresh(url, graphs, options) {
+    //TODO: generify
     window.intervalId = setInterval(function () {
         $.post(url, function (data) {
             var date = new Date(JSON.parse(data.date) * 1000.);
@@ -89,3 +90,34 @@ function createGraphs(graphs, dates, options) {
         }
     return graphs;
 }
+
+/*
+
+<script>
+    $(document).ready(function () {
+        var graphs={
+            "grah_cpu":{
+                data: [],
+                values: [
+
+                ],
+                labels: {
+
+                },
+                keywords: [],
+                factors: [],
+                graph:null
+            }
+        };
+        var options= {
+            point_size: 1.5,
+            stroke_width: 1,
+            update_period: 1000*{{monit_update_period}}
+        };
+        var dates = {{system.date}};
+        graphs = createGraphs(graphs, dates, options);
+        setupRefresh("{% url 'monitcollector.views.load_system_data' server.id %}", graphs, options);
+});
+</script>
+
+ */

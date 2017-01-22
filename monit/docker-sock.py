@@ -12,6 +12,7 @@ import time
 log = logging.getLogger(__name__)
 
 PORT = 5000
+MONITOR_STATUSES = ("running")
 
 containers = {}
 thread_map = {}
@@ -88,6 +89,7 @@ class StatThread(threading.Thread):
 
 
 def iterate_containers():
+	#TODO: get all containers ?all=True
 	containers = {}
 	with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as c:
 		c.connect("/var/run/docker.sock")
@@ -142,6 +144,7 @@ def update_containers():
 
 
 def update(reset=True):
+	#TODO: send history as well?
 	update_containers()
 	data = dict(containers)
 	for c in data:
