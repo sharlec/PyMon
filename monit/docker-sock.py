@@ -37,7 +37,10 @@ def container_cpu_percent(stats):
 	container_cpu = stats["cpu_stats"]["cpu_usage"]["total_usage"]
 	pre_container_cpu = stats["precpu_stats"]["cpu_usage"]["total_usage"]
 	system_cpu = stats["cpu_stats"]["system_cpu_usage"]
-	pre_system_cpu = stats["precpu_stats"]["system_cpu_usage"]
+	if "system_cpu_usage" in stats["precpu_stats"]:
+		pre_system_cpu = stats["precpu_stats"]["system_cpu_usage"]
+	else:
+		pre_system_cpu = 0
 	cpu = ((container_cpu - pre_container_cpu) / (system_cpu - pre_system_cpu)) * 100
 	log.debug("((%f - %f) / (%f - %f)) * 100 = %f", container_cpu, pre_container_cpu, system_cpu, pre_system_cpu, cpu)
 	return cpu
