@@ -305,8 +305,8 @@ class Container(models.Model):
 			container.image = stat['image']
 		container.state = stat['state']
 		container.status = stat['status']
-		system.date_last = int(time.time())
-		system.date = json_list_append(system.date, system.date_last)
+		container.date_last = int(time.time())
+		container.date = json_list_append(container.date, container.date_last)
 		if 'cpu' in stat['stats']:
 			container.cpu_last = stat['stats']['cpu']
 			container.cpu = json_list_append(container.cpu, container.cpu_last)
