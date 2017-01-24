@@ -9,6 +9,7 @@ log = logging.getLogger(__name__)
 
 monit_update_period = getattr(settings, 'MONIT_UPDATE_PERIOD', 60)
 maximum_store_days = getattr(settings, 'MAXIMUM_STORE_DAYS', 7)
+CONTAINER_METRICS = set(("cpu", "memory"))
 
 """
 from the monit source code (monit/contrib/wap.php):
@@ -305,12 +306,11 @@ class Container(models.Model):
 			container.image = stat['image']
 		container.state = stat['state']
 		container.status = stat['status']
-		container.date_last = int(time.time())
-		container.date = json_list_append(container.date, container.date_last)
-		if 'cpu' in stat['stats']:
+		if CONTAINER_METRICS <= stat['stats'].keys():
+			container.date_last = int(time.time())
+			container.date = json_list_append(container.date, container.date_last)
 			container.cpu_last = stat['stats']['cpu']
 			container.cpu = json_list_append(container.cpu, container.cpu_last)
-		if 'memory' in stat['stats']:
 			container.memory_last = stat['stats']['memory']
 			container.memory = json_list_append(container.memory, container.memory_last)
 		container.save()
