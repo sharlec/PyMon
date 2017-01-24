@@ -287,7 +287,9 @@ class Container(models.Model):
 	image = models.TextField()
 	state = models.TextField()
 	status = models.TextField()
-
+	
+	date_last = models.PositiveIntegerField(null=True)
+	date = models.TextField(null=True)
 	cpu_last = models.FloatField(null=True)
 	cpu = models.TextField(null=True)
 	memory_last = models.FloatField(null=True)
@@ -303,6 +305,8 @@ class Container(models.Model):
 			container.image = stat['image']
 		container.state = stat['state']
 		container.status = stat['status']
+		system.date_last = int(time.time())
+		system.date = json_list_append(system.date, system.date_last)
 		if 'cpu' in stat['stats']:
 			container.cpu_last = stat['stats']['cpu']
 			container.cpu = json_list_append(container.cpu, container.cpu_last)
