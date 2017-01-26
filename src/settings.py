@@ -36,6 +36,7 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=lambda v: [s.strip() for s in v.split(',')])
 
+
 # update period in seconds. only used for the graphs in the frontend
 # should be the same as set in the monitrc file e.g. "set daemon 60"
 MONIT_UPDATE_PERIOD = 60
