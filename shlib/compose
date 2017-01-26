@@ -89,11 +89,12 @@ $(monitcollector_env)
       - 8000
     networks:
       - internal
-    entrypoint: ["wait-for-postgres.sh", "db", "gunicornup.sh"]
+    entrypoint: ["dockerize", "-wait", "tcp://db:5432", "gunicornup.sh"]
 
 $(monit)
     environment:
       - MMONIT_URL=http://localhost/monitcollector/collector
+    entrypoint: ["dockerize", "-wait", "http://localhost:80", "-timeout", "300s", "/bin/bash","-c","/etc/monit/monit-start.sh"]
 
   caddy:
     build:
@@ -133,6 +134,7 @@ $(monitcollector)
 $(monit)
     environment:
       - MMONIT_URL=http://localhost:8000/monitcollector/collector
+    entrypoint: ["dockerize", "-wait", "http://localhost:8000", "-timeout", "300s", "/bin/bash","-c","/etc/monit/monit-start.sh"]
 EOF
 }
 
@@ -150,8 +152,8 @@ function start() {
     waitedSleep "PostgreSQL init process complete; ready for start up" "db" "${yml}"
     evaluate_result $? " Started service db"
   fi
-  waitedSleep "static files copied" "${service}" "${yml}"
-  evaluate_result $? " Started service ${service}"
+#  waitedSleep "static files copied" "${service}" "${yml}"
+#  evaluate_result $? " Started service ${service}"
   docker-compose -f "${yml}" up -d
 
   info "To stop the container again execute"
