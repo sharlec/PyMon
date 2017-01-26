@@ -48,7 +48,7 @@ function deployyml() {
   local caddy="./caddy"
   alpine_dockerfile Dockerfile.generic Dockerfile ${caddy}
 cat<<-EOF > "${RUN}"
-version: '2'
+version: '3'
 
 volumes:
   static:
@@ -89,6 +89,7 @@ $(monitcollector_env)
       - 8000
     networks:
       - internal
+    entrypoint: ["wait-for-postgres.sh", "db", "gunicornup.sh"]
 
 $(monit)
     environment:
@@ -128,7 +129,6 @@ $(monitcollector)
       - LISTEN_PORT=8000
     ports:
       - "8000:8000"
-    entrypoint: /pythonstart.sh
 
 $(monit)
     environment:
@@ -154,14 +154,6 @@ function start() {
   evaluate_result $? " Started service ${service}"
   docker-compose -f "${yml}" up -d
 
-#  if [[ "$created" == "true" ]]; then
-#    info "Setting up ${name}"
-#    read -r -d '' PYTHON <<-EOM
-#from django.contrib.auth.models import User;
-#User.objects.create_superuser('${ADMIN}', '${EMAIL}', '${PASSWD}')
-#EOM
-#    docker exec ${name} /bin/sh -c "echo \"$PYTHON\" | python manage.py shell"
-#fi
   info "To stop the container again execute"
   info "docker-compose down -v"
 }
