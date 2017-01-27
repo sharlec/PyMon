@@ -1,7 +1,7 @@
 FROM <IMAGE>
 
 ENV ARCH <ARCH>
-RUN apk add --update --no-cache postgresql-client postgresql-dev sqlite g++
+RUN apk add --update --no-cache postgresql-client postgresql-dev sqlite g++ gcc libxslt-dev
 COPY ./requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 RUN apk add --update --no-cache ca-certificates wget && \
