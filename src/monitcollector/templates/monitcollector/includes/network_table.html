@@ -1,0 +1,31 @@
+{% load monitcollector_tags %}
+
+{# table-striped table-condensed table-hover class="success" class="warning" class="danger"#}
+<div id="server_table" class="table-responsive">
+  <table class="table table-hover">
+    <thead>
+      <tr>
+	<td>name</td>
+	<td>state</td>
+	<td>speed</td>
+	<td>duplex</td>
+	<td>download total bytes</td>
+	<td>upload total bytes</td>
+      </tr>
+    </thead>
+    <tbody>
+      {% for network in networks %}
+	<tr class="link" onclick="document.location = '{% url "monitcollector.views.interface" server.id network.name %}';">
+	  <td>{{ network.name }}</td>
+	  {# <td class="{{ process.status|status_class:process.monitor }}">{{ process.status|status_str:process.monitor }}</td> #}
+    <td>{{ network.state }}</td>
+	  <td>{{ network.speed }}</td>
+	  <td>{{ network.duplex }}</td>
+	  <td>{{ network.download_bytes_total }}</td>
+	  <td>{{ network.upload_bytes_total }}</td>
+	</tr>
+      
+      {% endfor%}
+    </tbody>
+  </table>
+</div>

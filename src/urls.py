@@ -18,12 +18,13 @@ from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.conf.urls.static import static
+import monitcollector.urls
 
 admin.autodiscover()
 
 urlpatterns = patterns('',
     url(r'^$', 'monitcollector.views.dashboard', name='dashboard'),
-    url(r'^monitcollector/', include('monitcollector.urls')),
+    url(r'^monitcollector/', include(monitcollector.urls)),
 
     url(r'^accounts/login/$', auth_views.login, {'template_name': 'includes/login.html'}, name='login'),
     url(r'^logout/$', auth_views.logout, {'next_page': '/'}, name='logout'),

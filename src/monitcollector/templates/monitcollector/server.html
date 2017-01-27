@@ -17,23 +17,47 @@
 <div class="row clearfix">
   <div class="col-md-12 column">
     <p class="helper">Zoom: click-drag --- Pan: shift-click-drag --- Restore zoom level: double-click</p>
-    
+
     <div class="col-lg-4 col-md-6 column">
       <div id="graph_load" class="graph" style="width:100%;"></div>
     </div>
-    <div class="col-lg-4 col-md-6 column">  
+    <div class="col-lg-4 col-md-6 column">
       <div id="graph_cpu" class="graph" style="width:100%;"></div>
     </div>
-    <div class="col-lg-4 col-md-6 column">  
+    <div class="col-lg-4 col-md-6 column">
       <div id="graph_mem" class="graph" style="width:100%;"></div>
     </div>
   </div>
-</div> 
+</div>
 
 <div class="row clearfix marginTop">
   <div class="col-md-12 column">
     <div id="server_table" class="table-responsive">
         {% include "monitcollector/includes/server_table.html" %}
+    </div>
+  </div>
+</div>
+
+<div class="row clearfix">
+  <div class="col-md-12 column">
+    <p class="helper">Zoom: click-drag --- Pan: shift-click-drag --- Restore zoom level: double-click</p>
+
+    <div class="col-lg-4 col-md-6 column">
+      <div id="graph_download" class="graph" style="width:100%;"></div>
+    </div>
+    <div class="col-lg-4 col-md-6 column">
+      <!--div id="graph_cpu" class="graph" style="width:100%;"></div-->
+    </div>
+    <div class="col-lg-4 col-md-6 column">
+      <!--div id="graph_mem" class="graph" style="width:100%;"></div-->
+    </div>
+  </div>
+</div>
+
+<div class="row clearfix marginTop">
+  <div class="col-md-12 column">
+    <div id="network_table" class="table-responsive">
+        {% include "monitcollector/includes/network_table.html" %}
     </div>
   </div>
 </div>
@@ -49,37 +73,37 @@
 <script src="{% static 'js/jquery-2.1.4.min.js'%}"></script>
 <script src="{% static 'js/dygraph-combined.js'%}"></script>
 <script src="{% static 'js/csrf.js'%}"></script>
+<script src="{% static 'js/graphs.js' %}"></script>
 <script>
-    // smaller points if the data array is too big
+// smaller points if the data array is too big
     function set_linewidth(graph ,data) {
-        var range = graph.xAxisRange();
-        var data_points = 0;
-        for (var i = 0; i < data.length; i++) {
-            var x = data[i][0];
-            //if (x > minDate && x < maxDate)
-            if (x > range[0] && x < range[1]) {
-                data_points++;
-            }
-            // No need to check any further
-            if(data_points > 2000) {
-                break;
-            }
-        }
-        var new_opts = {};
-        if (data_points > 2000) {
-            new_opts.pointSize = 0.5;
-            new_opts.strokeWidth = 0.33;
-        }
-        else if (data_points > 900) {
-            new_opts.pointSize = 1;
-            new_opts.strokeWidth = 0.5;
-        } else {
-            new_opts.pointSize = 1.5;
-            new_opts.strokeWidth = 1.;
-        }
-        graph.updateOptions(new_opts);
+    		var range = graph.xAxisRange();
+    		var data_points = 0;
+    		for (var i = 0; i < data.length; i++) {
+    				var x = data[i][0];
+    				//if (x > minDate && x < maxDate)
+    				if (x > range[0] && x < range[1]) {
+    						data_points++;
+    				}
+    				// No need to check any further
+    				if(data_points > 2000) {
+    						break;
+    				}
+    		}
+    		var new_opts = {};
+    		if (data_points > 2000) {
+    				new_opts.pointSize = 0.5;
+    				new_opts.strokeWidth = 0.33;
+    		}
+    		else if (data_points > 900) {
+    				new_opts.pointSize = 1;
+    				new_opts.strokeWidth = 0.5;
+    		} else {
+    				new_opts.pointSize = 1.5;
+    				new_opts.strokeWidth = 1.;
+    		}
+    		graph.updateOptions(new_opts);
     }
-
     $(document).ready(function () {
         var point_size = 1.5;
         var stroke_width = 1;

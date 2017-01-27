@@ -34,6 +34,13 @@
      {% include "monitcollector/includes/process_table.html" %}
   </div>
 </div>
+    {%  if containers %}
+<div class="row clearfix marginTop">
+  <div class="col-md-12 column">
+     {% include "monitcollector/includes/container_table.html" %}
+  </div>
+</div>
+        {% endif %}
 <div class="row clearfix">
 {% if enable_buttons %}
         {% include "monitcollector/includes/process_buttons.html" %}
@@ -56,7 +63,46 @@
 <script src="{% static 'js/jquery-2.1.4.min.js'%}"></script>
 <script src="{% static 'js/dygraph-combined.js'%}"></script>
 <script src="{% static 'js/csrf.js'%}"></script>
+<script src="{% static 'js/graphs.js' %}"></script>
 {% if process.date %}
+    <script>/* TODO: graph.js -> setupRefresh
+    $(document).ready(function () {
+        var graphs={
+            "graph_cpu":{
+                data: [],
+                values: [{{process.cpu_percenttotal}}],
+                labels: {
+                    "ylabel": "CPU usage (in %)",
+                    "labels": ['Time', '{{process.name}} CPU usage']
+                },
+                keywords: [],
+                factors: [],
+                graph:null
+            },
+            "graph_mem":{
+                data: [],
+                values: [
+
+                ],
+                labels: {
+
+                },
+                keywords: [],
+                factors: [],
+                graph:null
+            }
+        };
+        var options= {
+            point_size: 1.5,
+            stroke_width: 1,
+            update_period: 1000*{{monit_update_period}}
+        };
+        var dates = {{system.date}};
+        graphs = createGraphs(graphs, dates, options);
+        setupRefresh("{% url 'monitcollector.views.load_system_data' server.id %}", graphs, options);
+});*/
+    </script>
+
 <script>
  $(document).ready(function () {
       var update_period = 1000*{{monit_update_period}};

@@ -38,6 +38,7 @@ function monit() {
     network_mode: "host"
     volumes:
       - ./monit/basic:/etc/monit/monitrc.d/basic
+      - /var/run/docker.sock:/var/run/docker.sock
 EOF
 }
 
