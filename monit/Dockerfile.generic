@@ -1,12 +1,19 @@
 FROM <IMAGE>
 MAINTAINER Marcel Grossmann <whatever4711@gmail.com>
 
-ENV arch <ARCH>
+ENV ARCH <ARCH>
 ENV MONIT_HOME=/etc/monit \
     MONIT_LOG=/var/log/monit \
     PATH=$PATH:/opt/bin \
     DOCKER_SOCK=http://localhost:5000/ \
     APY_HOME=/home/apy
+
+RUN apk add --update --no-cache ca-certificates wget && \
+    wget -O dockerize.tar.gz https://github.com/jwilder/dockerize/releases/download/v0.3.0/dockerize-linux-${ARCH}-v0.3.0.tar.gz && \
+    tar -xzvf dockerize.tar.gz && \
+    rm dockerize.tar.gz && \
+    mv dockerize /usr/local/bin/ && \
+    apk del ca-certificates wget
 
 RUN apk add --update monit bash curl python3 && \
     mkdir -p ${MONIT_LOG}
@@ -46,4 +53,4 @@ ENTRYPOINT ["/bin/bash","-c","${MONIT_HOME}/monit-start.sh"]
 LABEL \
     version=5.20.0-r3 \
     os="linux" \
-    arch="${arch}"
+    arch="${ARCH}"
