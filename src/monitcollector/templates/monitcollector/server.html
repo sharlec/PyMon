@@ -145,9 +145,10 @@
         };
         var dates = {{system.date}};
         graphs = createGraphs(graphs, dates, options);
-        setupRefresh("{% url 'monitcollector.views.load_system_data' server.id %}", graphs, options);
+        setupRefresh("{% url 'monitcollector.views.load_system_data' server.id %}", graphs, options, "{% url 'monitcollector.views.load_system_table' server.id %}");
 });
 </script>
+<!-- {{system_memory_zip}} -->
 {% csrf_token %}
 
 {% endblock %}

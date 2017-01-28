@@ -39,7 +39,7 @@ ALLOWED_HOSTS = []
 
 # update period in seconds. only used for the graphs in the frontend
 # should be the same as set in the monitrc file e.g. "set daemon 60"
-MONIT_UPDATE_PERIOD = 60
+MONIT_UPDATE_PERIOD = 15
 # maximum days to store data
 MAXIMUM_STORE_DAYS = 7.
 
