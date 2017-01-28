@@ -89,6 +89,9 @@ ENV/
 # Rope project settings
 .ropeproject
 
+# Migration Skripts
+src/monitcollector/migrations/*
+
 # Static files
 src/static/
 docker-compose.yml

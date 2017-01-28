@@ -1,3 +1,6 @@
+import json
+import requests
+
 from django.http import HttpResponse, HttpResponseNotAllowed
 from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
@@ -7,7 +10,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-import requests
 
 import logging
 
@@ -35,7 +37,7 @@ def collector(request):
 
 	collected = collect_data(data)
 	if not collected:
-		log.error("wrong data format")
+		log.error('wrong data format')
 		return HttpResponse('wrong data format')
 	return HttpResponse('ok')
 
@@ -58,19 +60,45 @@ def server(request, server_id):
 		system = server.system
 		processes = server.process_set.all().order_by('name')
 		networks = server.network_set.all().order_by('name')
-		log.error(networks)
-		return render(request, 'monitcollector/server.html',
-			{
-				'server': server,
-				'system': system,
-				'processes': processes,
-				'monit_update_period': monit_update_period,
+		return render(
+            request,
+            'monitcollector/server.html',
+            {
+                'server': server,
+                'system':system,
+                'system_load_zip': [
+                    list(z) for z in zip(
+                        json.loads(system.load_avg01),
+                        json.loads(system.load_avg05),
+                        json.loads(system.load_avg15)
+                    )
+                ],
+                'system_cpu_zip': [
+                    list(z) for z in zip(
+                        json.loads(system.cpu_user),
+                        json.loads(system.cpu_system),
+                        json.loads(system.cpu_wait)
+                    )
+                ],
+                'system_memory_zip': [
+                    list(z) for z in zip(
+                        json.loads(system.memory_percent),
+                        (int(k)/10**6 for k in json.loads(system.memory_kilobyte)),
+                        json.loads(system.swap_percent),
+                        (int(k)/10**6 for k in json.loads(system.swap_kilobyte))
+                    )
+                ],
+                'processes':processes,
+                'monit_update_period': monit_update_period,
 				'networks': networks
-			})
-	except Exception as e:
-		log.exception(e)
-		return render(request, 'monitcollector/dashboard.html', {'server_found': False})
-
+            }
+        )
+	except Server.DoesNotExist:
+		return render(
+            request,
+            'monitcollector/dashboard.html',
+            {'server_found': False}
+        )
 
 @staff_member_required
 def process(request, server_id, process_name):
@@ -79,18 +107,17 @@ def process(request, server_id, process_name):
 		process = server.process_set.get(name=process_name)
 		containers = process.container_set.all()
 		context = {
-					'enable_buttons': enable_buttons,
-					'process_found': True,
-					'server': server,
-					'process': process,
-					'monit_update_period': monit_update_period
-				}
+				'enable_buttons': enable_buttons,
+				'process_found': True,
+				'server': server,
+				'process': process,
+				'monit_update_period': monit_update_period
+		}
 		if len(containers)>0:
 			context["containers"] = containers
-		return render(request, 'monitcollector/process.html',
-				context)
-	except ObjectDoesNotExist:
-		return render(request, 'monitcollector/process.html', {'process_found': False})
+		return render(request, 'monitcollector/process.html',context)
+	except ObjectDoesNotExist or Server.DoesNotExist:
+		return render(request, 'monitcollector/process.html',{'process_found': False})
 
 
 @staff_member_required

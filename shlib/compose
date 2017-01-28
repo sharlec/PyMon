@@ -49,7 +49,7 @@ function deployyml() {
   local caddy="./caddy"
   alpine_dockerfile Dockerfile.generic Dockerfile ${caddy}
 cat<<-EOF > "${RUN}"
-version: '2'
+version: '3'
 
 volumes:
   static:
@@ -90,10 +90,12 @@ $(monitcollector_env)
       - 8000
     networks:
       - internal
+    entrypoint: ["dockerize", "-wait", "tcp://db:5432", "gunicornup.sh"]
 
 $(monit)
     environment:
       - MMONIT_URL=http://localhost/monitcollector/collector
+    entrypoint: ["dockerize", "-wait", "http://localhost:80", "-timeout", "300s", "/bin/bash","-c","/etc/monit/monit-start.sh"]
 
   caddy:
     build:
@@ -129,11 +131,11 @@ $(monitcollector)
       - LISTEN_PORT=8000
     ports:
       - "8000:8000"
-    entrypoint: /pythonstart.sh
 
 $(monit)
     environment:
       - MMONIT_URL=http://localhost:8000/monitcollector/collector
+    entrypoint: ["dockerize", "-wait", "http://localhost:8000", "-timeout", "300s", "/bin/bash","-c","/etc/monit/monit-start.sh"]
 EOF
 }
 
@@ -151,18 +153,10 @@ function start() {
     waitedSleep "PostgreSQL init process complete; ready for start up" "db" "${yml}"
     evaluate_result $? " Started service db"
   fi
-  waitedSleep "static files copied" "${service}" "${yml}"
-  evaluate_result $? " Started service ${service}"
+#  waitedSleep "static files copied" "${service}" "${yml}"
+#  evaluate_result $? " Started service ${service}"
   docker-compose -f "${yml}" up -d
 
-#  if [[ "$created" == "true" ]]; then
-#    info "Setting up ${name}"
-#    read -r -d '' PYTHON <<-EOM
-#from django.contrib.auth.models import User;
-#User.objects.create_superuser('${ADMIN}', '${EMAIL}', '${PASSWD}')
-#EOM
-#    docker exec ${name} /bin/sh -c "echo \"$PYTHON\" | python manage.py shell"
-#fi
   info "To stop the container again execute"
   info "docker-compose down -v"
 }

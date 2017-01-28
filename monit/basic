@@ -1,11 +1,12 @@
-set daemon 60
+set daemon 15
 set eventqueue basedir /var/monit slots 5000
 
 set httpd port 2812
-  use address 192.168.9.101
+  use address 141.13.92.7
   allow localhost
   allow 172.17.0.0/16
-  allow 192.168.9.0/25
+  allow 141.13.92.0/25
+  allow 192.168.9.0/24
   allow test:test
 
 #check process dockerd with pidfile /var/run/docker.pid
@@ -17,5 +18,4 @@ check network eth0 with interface eth0
 set limits {
 	programOutput: 1 MB	# http::/containers/json returns already 4kB with just 3 containers running
 }
-
 

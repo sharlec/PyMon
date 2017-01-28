@@ -10,18 +10,23 @@ ENV PGDATA /var/lib/postgresql/data
 RUN apk add --update --no-cache \
     postgresql curl bash \
     && curl -o /usr/local/bin/gosu -sSL "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$ARCH" \
-    && curl -o /entrypoint.sh https://raw.githubusercontent.com/whatever4711/django-monit-collector/master/postgres/docker-entrypoint.sh \
-    && chmod +x /usr/local/bin/gosu /entrypoint.sh \
+    && chmod +x /usr/local/bin/gosu \
     && apk del curl \
     && rm -rf /var/cache/apk/*
 
 ENV PATH /usr/lib/postgresql/$PG_MAJOR/bin:$PATH
 VOLUME /var/lib/postgresql/data
 
+ADD docker-entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 ENTRYPOINT [ "/entrypoint.sh" ]
 
 EXPOSE 5432
 CMD [ "postgres" ]
+
+COPY healthcheck.sh /usr/local/bin/
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+  CMD ["healthcheck.sh"]
 
 LABEL \
     version=9.5.4 \

@@ -34,7 +34,7 @@ function deploy() {
   if [ ! -f ${COMPOSE} ]; then
     info "Starting deployment environment"
     deployyml "${COMPOSE}"
-    DEVELOP=false
+    DEVELOP=true
     CREATED=true
   else
     info "Restarting previous session"

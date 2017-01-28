@@ -1,5 +1,6 @@
 from django.db import models
-import xml.etree.ElementTree as ET
+from xml.dom import minidom
+from lxml import etree as ET
 import json
 import time
 from django.conf import settings
@@ -38,10 +39,12 @@ $monitored[2] = 'Init';
 
 def collect_data(xml_str):
 	# only ready data if it has a monit id
-	tree = ET.fromstring(xml_str)
-	if tree.find('.[@id]') is None:
+	try:
+		tree = ET.fromstring(xml_str)
+		monit_id = getVal(tree, "@id", True)
+	except:
 		return False
-	Server.update(tree)
+	Server.update(tree, monit_id)
 	return True
 
 
@@ -96,6 +99,25 @@ def decode_status(status):
 	return out_str
 
 
+def getVal(xmldoc, expression, isAttribute=False):
+    try:
+        path = ET.XPath(expression)
+        count = ET.XPath('count(%s)' % expression)
+        if isAttribute:
+            if count(xmldoc) > 1:
+                val = path(xmldoc)
+            else:
+                val = path(xmldoc)[0]
+        else:
+            if count(xmldoc) > 1:
+                val = path(xmldoc)
+            else:
+                val = path(xmldoc)[0].text
+        return val
+    except:
+        return None
+
+
 def json_list_append(json_list, value):
 	log.debug("append " + str(value) + " to " + str(json_list))
 	try:
@@ -120,19 +142,11 @@ def remove_old_services(server, service_list):
 			process.delete()
 
 
-def get_float(tree, xpath) -> float:
-	return float(tree.find(xpath).text)
-
-
-def get_int(tree, xpath) -> int:
-	return int(tree.find(xpath).text)
-
-
-def parse_docker_json(xmltree):
-	output = xmltree.find("program/output").text
-	if output is None:
+def parse_docker_json(json_str):
+	log.error("JSON:" + json_str)
+	if json is None:
 		return []
-	struct = json.loads(output)
+	struct = json.loads(json_str)
 	containers = []
 	for c in struct:
 		containers.append(struct[c])
@@ -147,30 +161,30 @@ class Server(models.Model):
 	address = models.TextField(null=True)
 
 	@classmethod
-	def update(cls, tree):
+	def update(cls, xmldoc, monit_id):
+		log.info("updating server")
 		reporting_services = []
-		root = tree.find('.[@id]')
-		monit_id = root.get('id')
 		server, created = cls.objects.get_or_create(monit_id=monit_id)
-		# log.info("created server: "+created)
-		server.monit_version = root.get("version")
-		server.localhostname = root.find('./server/localhostname').text
-		server.uptime = root.find('./server/uptime').text
-		server.address = root.find('./server/httpd/address').text
+		server.monit_version = getVal(xmldoc, "@version", True)
+
+		server.localhostname = getVal(xmldoc, "./server/localhostname")
+		server.uptime = getVal(xmldoc, "./server/uptime")
+		server.address = getVal(xmldoc, "./server/address")
 		server.save()
-		Platform.update(root, server)
-		for service in root.findall('./services/service'):
-			service_type = service.find("type").text
-			service_name = service.get("name")
+		Platform.update(xmldoc, server)
+
+		for service in getVal(xmldoc, "services/service"):
+			service_type = getVal(service, "type")
+			service_name = getVal(service, "@name", True)
 			reporting_services.append(service_name)
 			# properties for type=5 (system)
 			if service_type == '5':
-				System.update(service, server)
+				System.update(server, service)
 			# we call everything else a Process, not only type=3
 			elif service_type == '8':
-				Network.update(service, server)
+				Network.update(server, service)
 			else:
-				Process.update(service, server)
+				Process.update(server, service)
 		remove_old_services(server, reporting_services)
 
 	def __str__(self):
@@ -178,30 +192,25 @@ class Server(models.Model):
 
 
 class Platform(models.Model):
-	server = models.OneToOneField('Server')
-	name = models.TextField(null=True)
-	release = models.TextField(null=True)
-	version = models.TextField(null=True)
-	machine = models.TextField(null=True)
-	cpu = models.IntegerField(null=True)
-	memory = models.IntegerField(null=True)
-	swap = models.IntegerField(null=True)
-
-	@classmethod
-	def update(cls, root, server):
-		plat_xml = root.find('./platform')
-		platform, created = Platform.objects.get_or_create(server=server)
-		platform.name = plat_xml.find('name').text
-		platform.release = plat_xml.find('release').text
-		platform.version = plat_xml.find('version').text
-		platform.machine = plat_xml.find('machine').text
-		platform.cpu = plat_xml.find('cpu').text
-		platform.memory = plat_xml.find('memory').text
-		platform.swap = plat_xml.find('swap').text
-		platform.save()
-
-	def __str__(self):
-		return self.name + " ("+ self.server.__str__()+")"
+    server = models.OneToOneField('Server')
+    name = models.TextField(null=True)
+    release = models.TextField(null=True)
+    version = models.TextField(null=True)
+    machine = models.TextField(null=True)
+    cpu = models.IntegerField(null=True)
+    memory = models.IntegerField(null=True)
+    swap = models.IntegerField(null=True)
+    @classmethod
+    def update(cls, xmldoc, server):
+        platform, created = Platform.objects.get_or_create(server=server)
+        platform.name = getVal(xmldoc, "platform/name")
+        platform.release = getVal(xmldoc, "platform/release")
+        platform.version = getVal(xmldoc, "platform/version")
+        platform.machine = getVal(xmldoc, "platform/machine")
+        platform.cpu = getVal(xmldoc, "platform/cpu")
+        platform.memory = getVal(xmldoc, "platform/memory")
+        platform.swap = getVal(xmldoc, "platform/swap")
+        platform.save()
 
 
 # Service
@@ -245,40 +254,39 @@ class System(Service):
 	swap_kilobyte = models.TextField(null=True)
 
 	@classmethod
-	def update(cls, service, server):
+	def update(cls, server, service):
 		system, created = cls.objects.get_or_create(server=server)
-		system.name = service.get("name")
-		system.status = decode_status(int(service.find("status").text))
-		system.status_hint = service.find("status_hint").text
-		system.monitor = service.find("monitor").text
-		system.monitormode = service.find("monitormode").text
-		system.pendingaction = service.find("pendingaction").text
-		if not service.find("system") is None:
+		system.name = getVal(service, "@name",True)
+		system.status = decode_status(int(getVal(service, "status")))
+		system.status_hint = getVal(service, "status_hint")
+		system.monitor = getVal(service, "monitor")
+		system.monitormode = getVal(service, "monitormode")
+		system.pendingaction = getVal(service, "pendingaction")
+		if not getVal(service, "system/load/avg01") is None:
 			system.date_last = int(time.time())
 			system.date = json_list_append(system.date, system.date_last)
-
-			system.load_avg01_last = get_float(service, 'system/load/avg01')
+			system.load_avg01_last = float(getVal(service, "system/load/avg01"))
 			system.load_avg01 = json_list_append(system.load_avg01, system.load_avg01_last)
-			system.load_avg05_last = get_float(service, 'system/load/avg05')
+			system.load_avg05_last = float(getVal(service, "system/load/avg05"))
 			system.load_avg05 = json_list_append(system.load_avg05, system.load_avg05_last)
-			system.load_avg15_last = get_float(service, 'system/load/avg15')
-			system.load_avg15 = json_list_append(system.load_avg15, system.load_avg15_last)
-			system.cpu_user_last = get_float(service, 'system/cpu/user')
+			system.load_avg15_last = float(getVal(service, "system/load/avg15"))
+			system.load_avg15 = json_list_append(system.load_avg15,  system.load_avg15_last)
+			system.cpu_user_last = float(getVal(service, "system/cpu/user"))
 			system.cpu_user = json_list_append(system.cpu_user, system.cpu_user_last)
-			system.cpu_system_last = get_float(service, 'system/cpu/system')
+			system.cpu_system_last = float(getVal(service, "system/cpu/system"))
 			system.cpu_system = json_list_append(system.cpu_system, system.cpu_system_last)
-			system.cpu_wait_last = get_float(service, 'system/cpu/wait')
+			system.cpu_wait_last = float(getVal(service, "system/cpu/wait"))
 			system.cpu_wait = json_list_append(system.cpu_wait, system.cpu_wait_last)
-			system.memory_percent_last = get_float(service, 'system/memory/percent')
+			system.memory_percent_last = float(getVal(service, "system/memory/percent"))
 			system.memory_percent = json_list_append(system.memory_percent, system.memory_percent_last)
-			system.memory_kilobyte_last = get_float(service, 'system/memory/kilobyte')
+			system.memory_kilobyte_last = int(getVal(service, "system/memory/kilobyte"))
 			system.memory_kilobyte = json_list_append(system.memory_kilobyte, system.memory_kilobyte_last)
-			system.swap_percent_last = get_float(service, 'system/swap/percent')
+			system.swap_percent_last = float(getVal(service, "system/swap/percent"))
 			system.swap_percent = json_list_append(system.swap_percent, system.swap_percent_last)
-			system.swap_kilobyte_last = get_float(service, 'system/swap/kilobyte')
+			system.swap_kilobyte_last = int(getVal(service, "system/swap/kilobyte"))
 			system.swap_kilobyte = json_list_append(system.swap_kilobyte, system.swap_kilobyte_last)
-
 		system.save()
+
 
 
 class Container(models.Model):
@@ -288,7 +296,6 @@ class Container(models.Model):
 	image = models.TextField()
 	state = models.TextField()
 	status = models.TextField()
-	
 	date_last = models.PositiveIntegerField(null=True)
 	date = models.TextField(null=True)
 	cpu_last = models.FloatField(null=True)
@@ -299,7 +306,7 @@ class Container(models.Model):
 	@classmethod
 	def update(cls, stat, process):
 		container_id = stat['id']
-		log.info("add container " + str(container_id))
+		log.debug("add container " + str(container_id))
 		container, created = cls.objects.get_or_create(process=process, docker_id=container_id)
 		if created:
 			container.name = stat['name']
@@ -314,7 +321,7 @@ class Container(models.Model):
 			container.memory_last = stat['stats']['memory']
 			container.memory = json_list_append(container.memory, container.memory_last)
 		container.save()
-		log.info("done with " + str(container_id))
+		log.debug("done with " + str(container_id))
 
 	def __str__(self):
 		return self.name
@@ -337,33 +344,31 @@ class Process(Service):
 	memory_kilobytetotal = models.TextField(null=True)
 
 	@classmethod
-	def update(cls, service, server):
-		service_name = service.get("name")
-		process, created = cls.objects.get_or_create(server=server, name=service_name)
-		process.status = decode_status(int(service.find("status").text))
-		process.status_hint = service.find("status_hint").text
-		process.monitor = service.find("monitor").text
-		process.monitormode = service.find("monitormode").text
-		process.pendingaction = service.find("pendingaction").text
-		if not service.find(".//cpu/percent") is None:
-			process.pid = service.find('.//pid').text
-			process.ppid = service.find('.//ppid').text
-			process.uptime = service.find('.//uptime').text
-			process.children = service.find('.//children').text
+	def update(cls, server, service):
+		service_name = getVal(service, "@name",True)
+		process, created = cls.objects.get_or_create(server=server,name=service_name)
+		process.status = decode_status(int(getVal(service, "status")))
+		process.status_hint = getVal(service, "status_hint")
+		process.monitor = getVal(service, "monitor")
+		process.monitormode = getVal(service, "monitormode")
+		process.pendingaction = getVal(service, "pendingaction")
+		if not getVal(service, "cpu/percent") is None:
+			process.pid = getVal(service, "pid")
+			process.ppid = getVal(service, "ppid")
+			process.uptime = getVal(service, "uptime")
+			process.children = getVal(service, "children")
 			# needs less characters than datetime.now().ctime() or datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 			process.date_last = int(time.time())
 			process.date = json_list_append(process.date, process.date_last)
-			process.cpu_percenttotal_last = get_float(service, './/cpu/percenttotal')
+			process.cpu_percenttotal_last = float(getVal(service, "cpu/percenttotal"))
 			process.cpu_percenttotal = json_list_append(process.cpu_percenttotal, process.cpu_percenttotal_last)
-			process.memory_percenttotal_last = get_float(service, './/memory/percenttotal')
-			process.memory_percenttotal = json_list_append(process.memory_percenttotal,
-														   process.memory_percenttotal_last)
-			process.memory_kilobytetotal_last = int(get_float(service, './/memory/kilobytetotal'))
-			process.memory_kilobytetotal = json_list_append(process.memory_kilobytetotal,
-															process.memory_kilobytetotal_last)
-		if "docker-containers" in service_name and not service.find("program/output") is None:
-			log.info("upate docker containers")
-			stats = parse_docker_json(service)
+			process.memory_percenttotal_last = float(getVal(service, "memory/percenttotal"))
+			process.memory_percenttotal = json_list_append(process.memory_percenttotal, process.memory_percenttotal_last)
+			process.memory_kilobytetotal_last = int(getVal(service, "memory/kilobytetotal"))
+			process.memory_kilobytetotal = json_list_append(process.memory_kilobytetotal, process.memory_kilobytetotal_last)
+
+		if service_name == "docker-containers" and not getVal(service, "program/output") is None:
+			stats = parse_docker_json(getVal(service, "program/output"))
 			log.info("%i: %s", len(stats), stats)
 			for s in stats:
 				log.debug(s)
@@ -409,48 +414,49 @@ class Network(Service):
 	upload_errors_total = models.TextField(null=True)
 
 	@classmethod
-	def update(cls, service, server):
-		service_name = service.get("name")
+	def update(cls, server, service):
+		service_name = getVal(service, "@name", True)
 		network, created = cls.objects.get_or_create(server=server, name=service_name)
-		network.status = decode_status(int(service.find("status").text))
-		network.status_hint = service.find("status_hint").text
-		network.monitor = service.find("monitor").text
-		network.monitormode = service.find("monitormode").text
-		network.pendingaction = service.find("pendingaction").text
+		network.status = decode_status(int(getVal(service, "status")))
+		network.status_hint = getVal(service, "status_hint")
+		network.monitor = getVal(service, "monitor")
+		network.monitormode = getVal(service, "monitormode")
+		network.pendingaction = getVal(service, "paddingaction")
 
-		if not service.find("link") is None:
-			network.state = get_int(service, 'link/state')
-			network.speed = get_int(service, 'link/speed')
-			network.duplex = get_int(service, 'link/duplex')
-			network.download_packets_now_last = get_int(service, 'link/download/packets/now')
+		if not getVal(service, "link/state") is None:
+
+			network.state = int(getVal(service, "link/state"))
+			network.speed =int(getVal(service, "link/speed"))
+			network.duplex = int(getVal(service, "link/duplex"))
+			network.download_packets_now_last = int(getVal(service, "link/download/packets/now"))
 			network.download_packets_now = json_list_append(network.download_packets_now,
 															network.download_packets_now_last)
-			network.download_packets_total_last = get_int(service, 'link/download/packets/total')
+			network.download_packets_total_last = int(getVal(service, 'link/download/packets/total'))
 			network.download_packets_total = json_list_append(network.download_packets_total,
 															  network.download_packets_total_last)
-			network.download_bytes_now_last = get_int(service, 'link/download/bytes/now')
+			network.download_bytes_now_last = int(getVal(service, 'link/download/bytes/now'))
 			network.download_bytes_now = json_list_append(network.download_bytes_now, network.download_bytes_now_last)
-			network.download_bytes_total_last = get_int(service, 'link/download/bytes/total')
+			network.download_bytes_total_last = int(getVal(service, 'link/download/bytes/total'))
 			network.download_bytes_total = json_list_append(network.download_bytes_total,
 															network.download_bytes_total_last)
-			network.download_errors_now_last = get_int(service, 'link/download/errors/now')
+			network.download_errors_now_last = int(getVal(service, 'link/download/errors/now'))
 			network.download_errors_now = json_list_append(network.download_errors_now,
 														   network.download_errors_now_last)
-			network.download_errors_total_last = get_int(service, 'link/download/errors/total')
+			network.download_errors_total_last = int(getVal(service, 'link/download/errors/total'))
 			network.download_errors_total = json_list_append(network.download_errors_total,
 															 network.download_errors_total_last)
-			network.upload_packets_now_last = get_int(service, 'link/upload/packets/now')
+			network.upload_packets_now_last = int(getVal(service, 'link/upload/packets/now'))
 			network.upload_packets_now = json_list_append(network.upload_packets_now, network.upload_packets_now_last)
-			network.upload_packets_total_last = get_int(service, 'link/upload/packets/total')
+			network.upload_packets_total_last = int(getVal(service, 'link/upload/packets/total'))
 			network.upload_packets_total = json_list_append(network.upload_packets_total,
 															network.upload_packets_total_last)
-			network.upload_bytes_now_last = get_int(service, 'link/upload/bytes/now')
+			network.upload_bytes_now_last = int(getVal(service, 'link/upload/bytes/now'))
 			network.upload_bytes_now = json_list_append(network.upload_bytes_now, network.upload_bytes_now_last)
-			network.upload_bytes_total_last = get_int(service, 'link/upload/bytes/total')
+			network.upload_bytes_total_last = int(getVal(service, 'link/upload/bytes/total'))
 			network.upload_bytes_total = json_list_append(network.upload_bytes_total, network.upload_bytes_total_last)
-			network.upload_errors_now_last = get_int(service, 'link/upload/errors/now')
+			network.upload_errors_now_last = int(getVal(service, 'link/upload/errors/now'))
 			network.upload_errors_now = json_list_append(network.upload_errors_now, network.upload_errors_now_last)
-			network.upload_errors_total_last = get_int(service, 'link/upload/errors/total')
+			network.upload_errors_total_last = int(getVal(service, 'link/upload/errors/total'))
 			network.upload_errors_total = json_list_append(network.upload_errors_total,
 														   network.upload_errors_total_last)
 
