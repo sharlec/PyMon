@@ -98,3 +98,6 @@ docker-compose.yml
 open-m-monit/*
 Dockerfile
 services.txt
+
+.idea/
+tmp/

@@ -30,7 +30,7 @@ function updateGraph(data, graph, items) {
     graph.updateOptions({'file': data});
 }
 
-function setupRefresh(url, graphs, options) {
+function setupRefresh(url, graphs, options, table_url) {
     //TODO: generify
     window.intervalId = setInterval(function () {
         $.post(url, function (data) {
@@ -49,7 +49,7 @@ function setupRefresh(url, graphs, options) {
         });
     }, options.update_period);
     window.intervalId = setInterval(function () {
-        $.post("{% url 'monitcollector.views.load_system_table' server.id %}", function (data) {
+        $.post(table_url, function (data) {
             $("#server_table").replaceWith(data.table_html);
         });
     }, 2000);
@@ -62,6 +62,11 @@ function createGraph(dates, graph, elementID, options) {
         }
         graph.data.push(list);
     }
+    //TODO: maybe integrate into *_zip
+	/*for (i = 0; i < date_objs.length; i++) {
+		//data_mem.push([date_objs[i], y1[i], y2[i] / 1.e6, y3[i], y4[i] / 1.e6]);
+		graph.values.unshift(date_objs[i]);
+	}*/
     graph.graph = new Dygraph(document.getElementById(elementID), graph.data,
         {
             legend: 'always', // show always
@@ -85,6 +90,10 @@ function createGraph(dates, graph, elementID, options) {
     return graph;
 }
 function createGraphs(graphs, dates, options) {
+    /*var date_objs = [];
+    for(var i = 0; i < dates.length; i++) {
+        date_objs.push(new Date(dates[i] * 1000));
+    }*/
     for (var id in graphs){
             createGraph(dates, graphs[id], id, options);
         }

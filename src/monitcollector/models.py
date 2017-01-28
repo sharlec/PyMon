@@ -296,7 +296,6 @@ class Container(models.Model):
 	image = models.TextField()
 	state = models.TextField()
 	status = models.TextField()
-
 	date_last = models.PositiveIntegerField(null=True)
 	date = models.TextField(null=True)
 	cpu_last = models.FloatField(null=True)

@@ -18,3 +18,4 @@ check network eth0 with interface eth0
 set limits {
 	programOutput: 1 MB	# http::/containers/json returns already 4kB with just 3 containers running
 }
+

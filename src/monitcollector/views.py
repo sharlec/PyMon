@@ -66,28 +66,31 @@ def server(request, server_id):
             {
                 'server': server,
                 'system':system,
-                'system_load_zip': [
-                    list(z) for z in zip(
-                        json.loads(system.load_avg01),
-                        json.loads(system.load_avg05),
-                        json.loads(system.load_avg15)
-                    )
-                ],
-                'system_cpu_zip': [
-                    list(z) for z in zip(
-                        json.loads(system.cpu_user),
-                        json.loads(system.cpu_system),
-                        json.loads(system.cpu_wait)
-                    )
-                ],
-                'system_memory_zip': [
-                    list(z) for z in zip(
-                        json.loads(system.memory_percent),
-                        (int(k)/10**6 for k in json.loads(system.memory_kilobyte)),
-                        json.loads(system.swap_percent),
-                        (int(k)/10**6 for k in json.loads(system.swap_kilobyte))
-                    )
-                ],
+# json.loads crashes with empty lists
+# additionally, this does not work with the generalized graphs yet
+# also: update load_*_data
+#                'system_load_zip': [
+#                    list(z) for z in zip(
+#                        json.loads(system.load_avg01),
+#                        json.loads(system.load_avg05),
+#                        json.loads(system.load_avg15)
+#                    )
+#                ],
+#                'system_cpu_zip': [
+#                    list(z) for z in zip(
+#                        json.loads(system.cpu_user),
+#                        json.loads(system.cpu_system),
+#                        json.loads(system.cpu_wait)
+#                    )
+#                ],
+#                'system_memory_zip': [
+#                    list(z) for z in zip(
+#                        json.loads(system.memory_percent),
+#                        (int(k)/10**6 for k in json.loads(system.memory_kilobyte)),
+#                        json.loads(system.swap_percent),
+#                        (int(k)/10**6 for k in json.loads(system.swap_kilobyte))
+#                    )
+#                ],
                 'processes':processes,
                 'monit_update_period': monit_update_period,
 				'networks': networks
