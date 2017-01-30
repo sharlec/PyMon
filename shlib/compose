@@ -149,13 +149,17 @@ function start() {
   local service=monitcollector
   local name="${dir}_${service}_1"
 
-  if [[ "$simple" == "false" ]]; then
-    waitedSleep "PostgreSQL init process complete; ready for start up" "db" "${yml}"
-    evaluate_result $? " Started service db"
-  fi
+#  if [[ "$simple" == "false" ]]; then
+#    waitedSleep "PostgreSQL init process complete; ready for start up" "db" "${yml}"
+#    evaluate_result $? " Started service db"
+#  fi
 #  waitedSleep "static files copied" "${service}" "${yml}"
 #  evaluate_result $? " Started service ${service}"
-  docker-compose -f "${yml}" up -d
+  if [[ "$created" == "true" ]]; then
+    docker-compose -f "${yml}" up --force-recreate --build -d
+  else
+    docker-compose -f "${yml}" up -d
+  fi
 
   info "To stop the container again execute"
   info "docker-compose down -v"
