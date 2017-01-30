@@ -41,7 +41,7 @@ def collect_data(xml_str):
 	# only ready data if it has a monit id
 	try:
 		tree = ET.fromstring(xml_str)
-		monit_id = getVal(tree, "@id", True)
+		monit_id = getVal(tree, "@id")
 	except:
 		return False
 	Server.update(tree, monit_id)
@@ -99,11 +99,11 @@ def decode_status(status):
 	return out_str
 
 
-def getVal(xmldoc, expression, isAttribute=False):
+def getVal(xmldoc, expression):
     try:
         path = ET.XPath(expression)
         count = ET.XPath('count(%s)' % expression)
-        if isAttribute:
+        if "@" in expression:
             if count(xmldoc) > 1:
                 val = path(xmldoc)
             else:
@@ -143,8 +143,7 @@ def remove_old_services(server, service_list):
 
 
 def parse_docker_json(json_str):
-	log.error("JSON:" + json_str)
-	if json is None:
+	if json_str is None or json_str is "":
 		return []
 	struct = json.loads(json_str)
 	containers = []
@@ -165,7 +164,7 @@ class Server(models.Model):
 		log.info("updating server")
 		reporting_services = []
 		server, created = cls.objects.get_or_create(monit_id=monit_id)
-		server.monit_version = getVal(xmldoc, "@version", True)
+		server.monit_version = getVal(xmldoc, "@version")
 
 		server.localhostname = getVal(xmldoc, "./server/localhostname")
 		server.uptime = getVal(xmldoc, "./server/uptime")
@@ -175,7 +174,7 @@ class Server(models.Model):
 
 		for service in getVal(xmldoc, "services/service"):
 			service_type = getVal(service, "type")
-			service_name = getVal(service, "@name", True)
+			service_name = getVal(service, "@name")
 			reporting_services.append(service_name)
 			# properties for type=5 (system)
 			if service_type == '5':
@@ -256,7 +255,7 @@ class System(Service):
 	@classmethod
 	def update(cls, server, service):
 		system, created = cls.objects.get_or_create(server=server)
-		system.name = getVal(service, "@name",True)
+		system.name = getVal(service, "@name")
 		system.status = decode_status(int(getVal(service, "status")))
 		system.status_hint = getVal(service, "status_hint")
 		system.monitor = getVal(service, "monitor")
@@ -345,7 +344,7 @@ class Process(Service):
 
 	@classmethod
 	def update(cls, server, service):
-		service_name = getVal(service, "@name",True)
+		service_name = getVal(service, "@name")
 		process, created = cls.objects.get_or_create(server=server,name=service_name)
 		process.status = decode_status(int(getVal(service, "status")))
 		process.status_hint = getVal(service, "status_hint")
@@ -368,13 +367,13 @@ class Process(Service):
 			process.memory_kilobytetotal = json_list_append(process.memory_kilobytetotal, process.memory_kilobytetotal_last)
 
 		if service_name == "docker-containers" and not getVal(service, "program/output") is None:
-			stats = parse_docker_json(getVal(service, "program/output"))
-			log.info("%i: %s", len(stats), stats)
+			stats = parse_docker_json(str(getVal(service, "program/output")))
+			log.info("Running Containers %i: %s", len(stats), stats)
 			for s in stats:
 				log.debug(s)
 				Container.update(s, process)
 		else:
-			log.info("no docker containers " + str(service_name))
+			log.info("%s has no docker containers", str(service_name))
 		process.save()
 
 	def __str__(self):
@@ -415,7 +414,7 @@ class Network(Service):
 
 	@classmethod
 	def update(cls, server, service):
-		service_name = getVal(service, "@name", True)
+		service_name = getVal(service, "@name")
 		network, created = cls.objects.get_or_create(server=server, name=service_name)
 		network.status = decode_status(int(getVal(service, "status")))
 		network.status_hint = getVal(service, "status_hint")

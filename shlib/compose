@@ -37,7 +37,7 @@ function monit() {
     privileged: True
     network_mode: "host"
     volumes:
-      - ./monit/basic:/etc/monit/monitrc.d/basic
+      - ./monit/monitrc.d/basic:/etc/monit/monitrc.d/basic
       - /var/run/docker.sock:/var/run/docker.sock
 EOF
 }
@@ -95,7 +95,7 @@ $(monitcollector_env)
 $(monit)
     environment:
       - MMONIT_URL=http://localhost/monitcollector/collector
-    entrypoint: ["dockerize", "-wait", "http://localhost:80", "-timeout", "300s", "/bin/bash","-c","/etc/monit/monit-start.sh"]
+    entrypoint: ["dockerize", "-wait", "http://localhost", "-timeout", "300s", "/bin/bash","-c","/docker-entrypoint"]
 
   caddy:
     build:
@@ -118,7 +118,7 @@ function developyml() {
   local RUN="${1}"
 
 cat<<-EOF > "${RUN}"
-version: '2'
+version: '3'
 
 volumes:
   sqlitedb:
@@ -135,7 +135,7 @@ $(monitcollector)
 $(monit)
     environment:
       - MMONIT_URL=http://localhost:8000/monitcollector/collector
-    entrypoint: ["dockerize", "-wait", "http://localhost:8000", "-timeout", "300s", "/bin/bash","-c","/etc/monit/monit-start.sh"]
+    entrypoint: ["dockerize", "-wait", "http://localhost:8000", "-timeout", "300s", "/bin/bash","-c","/docker-entrypoint"]
 EOF
 }
 
