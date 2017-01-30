@@ -1,0 +1,6 @@
+check process docker-apy with pidfile /var/run/py3_serve.pid
+	start program = "/bin/bash /home/apy/start_docker_apy.sh"
+	stop program = "/bin/rm /var/run/py3_serve.pid"
+
+check program docker-containers with path /home/apy/docker_apy.sh
+	if status != 0 then alert

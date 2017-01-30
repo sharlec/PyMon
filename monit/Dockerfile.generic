@@ -8,47 +8,26 @@ ENV MONIT_HOME=/etc/monit \
     DOCKER_SOCK=http://localhost:5000/ \
     APY_HOME=/home/apy
 
-RUN apk add --update --no-cache ca-certificates wget && \
+RUN BUILD_DEPS="ca-certificates wget"  && \
+    apk add --update --no-cache ${BUILD_DEPS} monit bash curl python3 && \
     wget -O dockerize.tar.gz https://github.com/jwilder/dockerize/releases/download/v0.3.0/dockerize-linux-${ARCH}-v0.3.0.tar.gz && \
     tar -xzvf dockerize.tar.gz && \
     rm dockerize.tar.gz && \
     mv dockerize /usr/local/bin/ && \
-    apk del ca-certificates wget
+    apk del ${BUILD_DEPS} && \
+    mkdir -p ${MONIT_LOG} ${APY_HOME} ${MONIT_HOME}/monitrc.d
 
-RUN apk add --update monit bash curl python3 && \
-    mkdir -p ${MONIT_LOG}
+COPY monitrc ${MONIT_HOME}/monitrc
+COPY monitrc.d ${MONIT_HOME}/monitrc.d
+COPY scripts/ ${APY_HOME}/
 
-RUN mkdir -p ${MONIT_HOME}/monitrc.d && \
-    echo "include ${MONIT_HOME}/monitrc.d/*" > ${MONIT_HOME}/monitrc && \
-    echo "set logfile ${MONIT_LOG}/monit.log" >> ${MONIT_HOME}/monitrc && \
-    echo "set pidfile ${MONIT_LOG}/monit.pid" >> ${MONIT_HOME}/monitrc && \
-    echo "set statefile ${MONIT_LOG}/monit.state" >> ${MONIT_HOME}/monitrc && \
-    chmod 700 ${MONIT_HOME}/monitrc && \
+RUN chmod 700 ${MONIT_HOME}/monitrc && \
+    chmod +x ${APY_HOME}/*.sh ${APY_HOME}/docker-sock.py && \
     rm -f /etc/monitrc && \
     ln -s /etc/monit/monitrc /etc/monitrc && \
-    mkdir -p ${APY_HOME} && \
-    echo "#!/bin/bash" > ${APY_HOME}/docker_apy.sh && \
-    echo "echo \$(curl -s ${DOCKER_SOCK});" >> ${APY_HOME}/docker_apy.sh && \
-    echo "exit \$?;" >> ${APY_HOME}/docker_apy.sh && \
-    chmod +x ${APY_HOME}/docker_apy.sh && \
-    echo "#!/bin/bash" > ${APY_HOME}/start_docker_apy.sh && \
-	echo "${APY_HOME}/docker-sock.py & " >> ${APY_HOME}/start_docker_apy.sh && \
-	echo "echo \$! > /var/run/py3_serve.pid" >> ${APY_HOME}/start_docker_apy.sh && \
-	echo "exit \$?" >> ${APY_HOME}/start_docker_apy.sh && \
-    chmod +x ${APY_HOME}/start_docker_apy.sh && \
-    echo "check process docker-apy with pidfile /var/run/py3_serve.pid" > ${MONIT_HOME}/monitrc.d/docker && \
-	echo "	start program = \"/bin/bash ${APY_HOME}/start_docker_apy.sh\"" >> ${MONIT_HOME}/monitrc.d/docker && \
-	echo "	stop program = \"/bin/rm /var/run/py3_serve.pid\"" >> ${MONIT_HOME}/monitrc.d/docker && \
-	echo "" >> ${MONIT_HOME}/monitrc.d/docker && \
-	echo "check program docker-containers with path ${APY_HOME}/docker_apy.sh" >> ${MONIT_HOME}/monitrc.d/docker && \
-	echo "	if status != 0 then alert" >> ${MONIT_HOME}/monitrc.d/docker
+    ln -s ${APY_HOME}/monit-start.sh /docker-entrypoint
 
-COPY monit-start.sh ${MONIT_HOME}/
-COPY docker-sock.py ${APY_HOME}/
-RUN chmod +x ${MONIT_HOME}/monit-start.sh && \
-	chmod +x ${APY_HOME}/docker-sock.py
-
-ENTRYPOINT ["/bin/bash","-c","${MONIT_HOME}/monit-start.sh"]
+ENTRYPOINT ["/bin/bash","-c","/docker-entrypoint"]
 
 LABEL \
     version=5.20.0-r3 \
