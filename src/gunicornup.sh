@@ -15,8 +15,8 @@ python3 manage.py collectstatic --noinput
 mkdir -p /var/www/env_projects/pymonit
 
 if [ ! -f "/.created" ]; then
-local current=$PWD
-local tmp_file=admin.py
+current=$PWD
+tmp_file=admin.py
 cd ${WORKDIR}
 admin_user=${ADMIN:-admin}
 echo ">>> >>> Setting up AdminUser ${admin_user}"

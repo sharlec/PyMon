@@ -1,9 +1,9 @@
 # Caddyfile
 
-localhost:80 {
+http://141.13.92.2 http://localhost {
   tls off
   root /var/www/html
-  proxy / http://monitcollector:8000 {
+  proxy / monitcollector:8000 {
     except /static
     transparent
   }

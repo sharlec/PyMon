@@ -90,12 +90,12 @@ $(monitcollector_env)
       - 8000
     networks:
       - internal
-    entrypoint: ["dockerize", "-wait", "tcp://db:5432", "gunicornup.sh"]
+    entrypoint: ["dockerize", "-wait", "tcp://db:5432", "-timeout", "3600s", "gunicornup.sh"]
 
 $(monit)
     environment:
       - MMONIT_URL=http://localhost/monitcollector/collector
-    entrypoint: ["dockerize", "-wait", "http://localhost", "-timeout", "300s", "/bin/bash","-c","/docker-entrypoint"]
+    entrypoint: ["dockerize", "-wait", "http://localhost", "-timeout", "3600s", "/bin/bash","-c","/docker-entrypoint"]
 
   caddy:
     build:
