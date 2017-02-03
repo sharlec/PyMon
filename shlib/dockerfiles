@@ -1,9 +1,11 @@
 #!/bin/sh
 
 ALPINE_64="alpine:edge"
-PYTHON_64="python:3.5-alpine"
+PYTHON_64="python:3.6-alpine"
 ALPINE_ARM="armhf/alpine:edge"
-PYTHON_ARM="armhf/python:3.5-alpine"
+PYTHON_ARM="armhf/python:3.6-alpine"
+ALPINE_AARCH="aarch64/alpine:edge"
+PYTHON_AARCH="aarch64/python:3.6-alpine"
 
 function alpine_dockerfile() {
   local generic="${3:-$PWD}/${1}"
@@ -13,6 +15,9 @@ function alpine_dockerfile() {
     return 0
   elif [ "${ARCH}" == "armhf" ]; then
     sed -e "s|<IMAGE>|${ALPINE_ARM}|g" -e "s|<ARCH>|${ARCH}|g" "${generic}" > ${output}
+    return 0
+  elif [ "${ARCH}" == "aarch64" ]; then
+    sed -e "s|<IMAGE>|${ALPINE_AARCH}|g" -e "s|<ARCH>|${ARCH}|g" "${generic}" > ${output}
     return 0
   else
     return 1
@@ -27,6 +32,9 @@ function python_dockerfile() {
     return 0
   elif [ "$ARCH" == "armhf" ]; then
     sed -e "s|<IMAGE>|${PYTHON_ARM}|g" -e "s|<ARCH>|${ARCH}|g" "${generic}" > ${output}
+    return 0
+  elif [ "$ARCH" == "aarch64" ]; then
+    sed -e "s|<IMAGE>|${PYTHON_AARCH}|g" -e "s|<ARCH>|${ARCH}|g" "${generic}" > ${output}
     return 0
   else
     return 1

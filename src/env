@@ -4,5 +4,5 @@ NEVERCACHE_KEY=s3cr3t_key
 MONIT_USER=your_user
 MONIT_PASSWORD=your_password
 MONIT_PORT=2812
-ALLOWED_HOSTS=[]
+ALLOWED_HOSTS=*,localhost
 DATABASE_URL=sqlite:////tmp/db.sqlite3

@@ -8,6 +8,7 @@ ENV MONIT_HOME=/etc/monit \
     DOCKER_SOCK=http://localhost:5000/ \
     APY_HOME=/home/apy
 
+# Problem with dockerize on AARCH64, need to use armhf-version
 RUN BUILD_DEPS="ca-certificates wget"  && \
     apk add --update --no-cache ${BUILD_DEPS} monit bash curl python3 && \
     wget -O dockerize.tar.gz https://github.com/jwilder/dockerize/releases/download/v0.3.0/dockerize-linux-${ARCH}-v0.3.0.tar.gz && \
