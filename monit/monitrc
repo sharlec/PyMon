@@ -1,0 +1,4 @@
+include /etc/monit/monitrc.d/*
+set logfile /var/log/monit/monit.log
+set pidfile /var/log/monit/monit.pid
+set statefile /var/log/monit/monit.state

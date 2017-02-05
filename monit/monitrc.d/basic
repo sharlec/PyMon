@@ -10,7 +10,7 @@ set httpd port 2812
   allow test:test
 
 #check process dockerd with pidfile /var/run/docker.pid
-check process monit with pidfile /var/run/monit.pid
+check process monit with pidfile /var/log/monit/monit.pid
 check network eth0 with interface eth0
 # Checks space and inode usage
 #check filesystem mmcblk0 with path /
@@ -18,4 +18,3 @@ check network eth0 with interface eth0
 set limits {
 	programOutput: 1 MB	# http::/containers/json returns already 4kB with just 3 containers running
 }
-
