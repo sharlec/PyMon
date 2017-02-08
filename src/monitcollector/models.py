@@ -367,6 +367,7 @@ class Process(Service):
 			process.memory_kilobytetotal = json_list_append(process.memory_kilobytetotal, process.memory_kilobytetotal_last)
 
 		if service_name == "docker-containers" and not getVal(service, "program/output") is None:
+			log.info("Output: " + getVal(service, "program/output"))
 			stats = parse_docker_json(str(getVal(service, "program/output")))
 			log.info("Running Containers %i: %s", len(stats), stats)
 			for s in stats:

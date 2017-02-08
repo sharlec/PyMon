@@ -21,10 +21,11 @@
     <td>{{ network.state }}</td>
 	  <td>{{ network.speed }}</td>
 	  <td>{{ network.duplex }}</td>
-	  <td>{{ network.download_bytes_total }}</td>
-	  <td>{{ network.upload_bytes_total }}</td>
+    <!-- TODO: Reduce it here -->
+	  <td>{{ network.download_bytes_total_last }}</td>
+	  <td>{{ network.upload_bytes_total_last }}</td>
 	</tr>
-      
+
       {% endfor%}
     </tbody>
   </table>

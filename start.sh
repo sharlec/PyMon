@@ -57,6 +57,14 @@ function clean() {
   rm -f "${COMPOSE}"
 }
 
+function backup() {
+  # TODO
+}
+
+function restore() {
+  # TODO
+}
+
 function usage(){
 cat << EOM
   usage:
@@ -66,6 +74,8 @@ cat << EOM
   build         rebuild all docker images
   stop          stop the application
   clean         remove everything (invokes stop)
+  backup        create DB backup
+  restore       restore backup
 
 EOM
 }
@@ -77,6 +87,8 @@ if [ $# -eq 1 ]; then
     "build")    build;;
     "stop")     stop;;
     "clean")    clean;;
+    "backup")     backup;;
+    "restor")    restore;;
     *) usage;;
   esac
 else

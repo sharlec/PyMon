@@ -46,7 +46,7 @@
       <div id="graph_download" class="graph" style="width:100%;"></div>
     </div>
     <div class="col-lg-4 col-md-6 column">
-      <!--div id="graph_cpu" class="graph" style="width:100%;"></div-->
+      <div id="graph_upload" class="graph" style="width:100%;"></div>
     </div>
     <div class="col-lg-4 col-md-6 column">
       <!--div id="graph_mem" class="graph" style="width:100%;"></div-->
@@ -135,6 +135,20 @@
                 values: [
                     {{networks.0.download_bytes_total}},
                     {{networks.0.download_bytes_now}}
+                ] //TODO: these {#  { }}#} are django-templates!!!
+            },
+						"graph_upload":{
+                data: [],
+                labels: {
+                    "ylabel":"network usage",
+                            "labels":['Time', 'upload_bytes_total', 'upload_bytes_now']
+                },
+                graph: null,
+                keywords:["upload_bytes_total","upload_bytes_now"],
+                factors:[1.e6,1.e6],
+                values: [
+                    {{networks.0.upload_bytes_total}},
+                    {{networks.0.upload_bytes_now}}
                 ] //TODO: these {#  { }}#} are django-templates!!!
             }
         };
