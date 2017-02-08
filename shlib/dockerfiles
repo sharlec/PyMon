@@ -10,33 +10,30 @@ PYTHON_AARCH="aarch64/python:3.6-alpine"
 function alpine_dockerfile() {
   local generic="${3:-$PWD}/${1}"
   local output="${3:-$PWD}/${2}"
-  if [ "${ARCH}" == "amd64" ]; then
-    sed -e "s|<IMAGE>|${ALPINE_64}|g" -e "s|<ARCH>|${ARCH}|g" "${generic}" > ${output}
-    return 0
-  elif [ "${ARCH}" == "armhf" ]; then
-    sed -e "s|<IMAGE>|${ALPINE_ARM}|g" -e "s|<ARCH>|${ARCH}|g" "${generic}" > ${output}
-    return 0
-  elif [ "${ARCH}" == "aarch64" ]; then
-    sed -e "s|<IMAGE>|${ALPINE_AARCH}|g" -e "s|<ARCH>|${ARCH}|g" "${generic}" > ${output}
-    return 0
-  else
-    return 1
-  fi
+  case ${ARCH} in
+    amd64) sed -e "s|<IMAGE>|${ALPINE_64}|g" -e "s|<ARCH>|${ARCH}|g" "${generic}" > ${output} && return 0;;
+    armhf) sed -e "s|<IMAGE>|${ALPINE_ARM}|g" -e "s|<ARCH>|${ARCH}|g" "${generic}" > ${output} && return 0;;
+    aarch64) sed -e "s|<IMAGE>|${ALPINE_AARCH}|g" -e "s|<ARCH>|${ARCH}|g" "${generic}" > ${output} && return 0;;
+    *) return 1;;
+  esac
 }
 
 function python_dockerfile() {
   local generic="${3:-$PWD}/${1}"
   local output="${3:-$PWD}/${2}"
-  if [ "${ARCH}" == "amd64" ]; then
-    sed -e "s|<IMAGE>|${PYTHON_64}|g" -e "s|<ARCH>|${ARCH}|g" "${generic}" > ${output}
-    return 0
-  elif [ "$ARCH" == "armhf" ]; then
-    sed -e "s|<IMAGE>|${PYTHON_ARM}|g" -e "s|<ARCH>|${ARCH}|g" "${generic}" > ${output}
-    return 0
-  elif [ "$ARCH" == "aarch64" ]; then
-    sed -e "s|<IMAGE>|${PYTHON_AARCH}|g" -e "s|<ARCH>|${ARCH}|g" "${generic}" > ${output}
-    return 0
-  else
-    return 1
-  fi
+  case ${ARCH} in
+    amd64) sed -e "s|<IMAGE>|${PYTHON_64}|g" -e "s|<ARCH>|${ARCH}|g" "${generic}" > ${output} && return 0;;
+    armhf) sed -e "s|<IMAGE>|${PYTHON_ARM}|g" -e "s|<ARCH>|${ARCH}|g" "${generic}" > ${output} && return 0;;
+    aarch64) sed -e "s|<IMAGE>|${PYTHON_AARCH}|g" -e "s|<ARCH>|${ARCH}|g" "${generic}" > ${output} && return 0;;
+    *) return 1;;
+  esac
+}
+
+function alpine() {
+  case ${ARCH} in
+    amd64) echo ${ALPINE_64} && return 0;;
+    armhf) echo ${ALPINE_ARM} && return 0;;
+    aarch64) echo ${ALPINE_AARCH} && return 0;;
+    *) return 1;;
+  esac
 }

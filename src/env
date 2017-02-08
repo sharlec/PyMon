@@ -5,4 +5,4 @@ MONIT_USER=your_user
 MONIT_PASSWORD=your_password
 MONIT_PORT=2812
 ALLOWED_HOSTS=*,localhost
-DATABASE_URL=sqlite:////tmp/db.sqlite3
+DATABASE_URL=sqlite:////data/db.sqlite3

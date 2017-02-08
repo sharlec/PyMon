@@ -126,7 +126,7 @@ volumes:
 
 services:
 $(monitcollector)
-      - sqlitedb:/usr/src/app/data
+      - sqlitedb:/data
     environment:
       - LISTEN_PORT=8000
     ports:
@@ -149,12 +149,6 @@ function start() {
   local service=monitcollector
   local name="${dir}_${service}_1"
 
-#  if [[ "$simple" == "false" ]]; then
-#    waitedSleep "PostgreSQL init process complete; ready for start up" "db" "${yml}"
-#    evaluate_result $? " Started service db"
-#  fi
-#  waitedSleep "static files copied" "${service}" "${yml}"
-#  evaluate_result $? " Started service ${service}"
   if [[ "$created" == "true" ]]; then
     docker-compose -f "${yml}" up --force-recreate --build -d
   else
@@ -163,27 +157,4 @@ function start() {
 
   info "To stop the container again execute"
   info "docker-compose down -v"
-}
-
-function waitedSleep() {
-  local finished="$1"
-  local service="$2"
-  local yml="$3"
-  local seconds=1
-  local rc=0
-
-  docker-compose -f "${yml}" up -d "${service}"
-  while true; do
-    docker-compose -f "${yml}" logs "${service}" | grep "${finished}" &> /dev/null
-    if [ $? == 0 ]; then
-      break
-    elif ((seconds < ${TIMEOUT})); then
-        waiting "${seconds}" "for "${service}" to be ready\e[0m"
-        seconds=$((seconds+1))
-    else
-        rc=1
-        break
-    fi
-  done
-  return $rc
 }

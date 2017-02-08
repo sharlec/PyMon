@@ -58,11 +58,18 @@ function clean() {
 }
 
 function backup() {
-  # TODO
+  mkdir -p backup
+
+  # TODO For Postgres
+  docker run --rm -v $PWD/backup:/backup -v djangomonitcollector_pgdata:/data $(alpine) tar czf /backup/postgres.tar.gz data
+  # TODO For SQLite
+  docker run --rm -v $PWD/backup:/backup -v djangomonitcollector_sqlitedb:/data $(alpine) tar czf /backup/sqlite.tar.gz data
+  sudo chown -R $UID backup
 }
 
 function restore() {
-  # TODO
+  # TODO container name
+  docker run --rm -v $PWD/backup:/backup -v djangomonitcollector_pgdata:/data alpine tar xzf /backup/data.tar.gz
 }
 
 function usage(){
@@ -88,7 +95,7 @@ if [ $# -eq 1 ]; then
     "stop")     stop;;
     "clean")    clean;;
     "backup")     backup;;
-    "restor")    restore;;
+    "restore")    restore;;
     *) usage;;
   esac
 else
