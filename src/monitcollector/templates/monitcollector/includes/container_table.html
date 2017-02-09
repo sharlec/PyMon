@@ -18,7 +18,7 @@
           <td>{{ container.docker_id|slice:":12" }}</td>
           <td>{{ container.name }}</td>
             <td>{{ container.status}}</td>
-            <td>{{ container.state}}</td>
+            <td class="{{ container.date_last|time_class }}">{{ container.state}}</td>
             <td>{{ container.image}}</td>
           <td>{{ container.cpu_last|percent }}</td>
           <td>{{ container.memory_last }}</td>
