@@ -101,3 +101,4 @@ services.txt
 
 .idea/
 tmp/
+*.tar.gz

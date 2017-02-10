@@ -4,8 +4,10 @@ ENV ARCH <ARCH>
 RUN apk add --update --no-cache postgresql-client postgresql-dev sqlite g++ gcc libxslt-dev
 COPY ./requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+# Problem with dockerize on AARCH64, need to use armhf-version
 RUN apk add --update --no-cache ca-certificates wget && \
-    wget -O dockerize.tar.gz https://github.com/jwilder/dockerize/releases/download/v0.3.0/dockerize-linux-${ARCH}-v0.3.0.tar.gz && \
+    DOCKERIZE_ARCH=$(echo "${ARCH}" | sed -e "s/aarch64/armhf/g") && \
+    wget -O dockerize.tar.gz https://github.com/jwilder/dockerize/releases/download/v0.3.0/dockerize-linux-${DOCKERIZE_ARCH}-v0.3.0.tar.gz && \
     tar -xzvf dockerize.tar.gz && \
     rm dockerize.tar.gz && \
     mv dockerize /usr/local/bin/ && \

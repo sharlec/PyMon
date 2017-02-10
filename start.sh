@@ -57,6 +57,21 @@ function clean() {
   rm -f "${COMPOSE}"
 }
 
+function backup() {
+  mkdir -p backup
+
+  # TODO For Postgres
+  docker run --rm -v $PWD/backup:/backup -v djangomonitcollector_pgdata:/data $(alpine) tar czf /backup/postgres.tar.gz data
+  # TODO For SQLite
+  docker run --rm -v $PWD/backup:/backup -v djangomonitcollector_sqlitedb:/data $(alpine) tar czf /backup/sqlite.tar.gz data
+  sudo chown -R $UID backup
+}
+
+function restore() {
+  # TODO container name
+  docker run --rm -v $PWD/backup:/backup -v djangomonitcollector_pgdata:/data alpine tar xzf /backup/data.tar.gz
+}
+
 function usage(){
 cat << EOM
   usage:
@@ -66,6 +81,8 @@ cat << EOM
   build         rebuild all docker images
   stop          stop the application
   clean         remove everything (invokes stop)
+  backup        create DB backup
+  restore       restore backup
 
 EOM
 }
@@ -77,6 +94,8 @@ if [ $# -eq 1 ]; then
     "build")    build;;
     "stop")     stop;;
     "clean")    clean;;
+    "backup")     backup;;
+    "restore")    restore;;
     *) usage;;
   esac
 else

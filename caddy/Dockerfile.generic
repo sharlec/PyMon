@@ -6,7 +6,7 @@ ENV url "https://caddyserver.com/download/build?"
 ENV params "&features=git%2Chugo%2Cipfilter%2Cmailout%2Cprometheus%2Crealip%2Csearch"
 RUN apk add --update --no-cache openssh-client curl git tar
 
-RUN mkdir /caddysrc && CADDYARCH=$(echo "${arch}" | sed -e "s/armhf/arm/g") && \
+RUN mkdir /caddysrc && CADDYARCH=$(echo "${arch}" | sed -e "s/armhf/arm/g" -e "s/aarch64/arm/g") && \
     curl -sL -o /caddysrc/caddy_linux_arm.tar.gz "${url}os=linux&arch=${CADDYARCH}${params}" && \
     tar -xf /caddysrc/caddy_linux_arm.tar.gz -C /caddysrc && \
     mv /caddysrc/caddy /usr/bin/caddy && \
