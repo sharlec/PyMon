@@ -111,6 +111,17 @@ $(monit)
       - ./caddy/Caddyfile:/etc/Caddyfile
     ports:
       - "80:80"
+
+  Rplots:
+    build:
+      context: ./Rplots
+      dockerfile: Dockerfile
+    image: Rplots
+    networks:
+      - internal
+    volumes:
+      - ./Rplots:/plots
+    entrypoint: ["R", "CMD", "BATCH", "postgres.r"]
 EOF
 }
 
@@ -136,6 +147,17 @@ $(monit)
     environment:
       - MMONIT_URL=http://localhost:8000/monitcollector/collector
     entrypoint: ["dockerize", "-wait", "http://localhost:8000", "-timeout", "300s", "/bin/bash","-c","/docker-entrypoint"]
+
+  Rplots:
+    build:
+      context: ./Rplots
+      dockerfile: Dockerfile
+    image: Rplots
+    networks:
+      - internal
+    volumes:
+      - ./Rplots:/plots
+    entrypoint: ["R", "CMD", "BATCH", "postgres.r"]
 EOF
 }
 
