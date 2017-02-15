@@ -112,11 +112,11 @@ $(monit)
     ports:
       - "80:80"
 
-  Rplots:
+  rplots:
     build:
       context: ./Rplots
       dockerfile: Dockerfile
-    image: Rplots
+    image: rplots
     networks:
       - internal
     volumes:
@@ -148,11 +148,11 @@ $(monit)
       - MMONIT_URL=http://localhost:8000/monitcollector/collector
     entrypoint: ["dockerize", "-wait", "http://localhost:8000", "-timeout", "300s", "/bin/bash","-c","/docker-entrypoint"]
 
-  Rplots:
+  rplots:
     build:
       context: ./Rplots
       dockerfile: Dockerfile
-    image: Rplots
+    image: rplots
     networks:
       - internal
     volumes:

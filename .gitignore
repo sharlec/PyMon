@@ -106,6 +106,6 @@ tmp/
 # R artifacts
 ners.pdf
 *.pdf
-*.RData
+*.R*
 *.r.Rout
 				
