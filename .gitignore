@@ -104,7 +104,7 @@ tmp/
 *.tar.gz
 
 # R artifacts
-ners.pdf
+*.png
 *.pdf
 *.R*
 *.r.Rout
