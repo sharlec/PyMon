@@ -10,7 +10,7 @@ prepare_data = function(sys, i, field, x){
 
 plot_system = function (file, start, end, ymin, ymax, xlab, ylab, sys, field){
 	png(file=file)
-	plot(c(0,30000), c(ymin, ymax), type="n", xlab=xlab, ylab=ylab)
+	plot(c(0,22500), c(ymin, ymax), type="n", xlab=xlab, ylab=ylab)
 	#axis.POSIXct(1,as.POSIXct(seq(start,end), origin="1970-01-01"), format="%Y-%m-%d %H:%M:%S")
 	lapply(
 		seq(1,length(sys$server_id)), 
@@ -36,8 +36,3 @@ end = end
 
 plot_system("net_down.png", start, end, 0, 4000000, "\"Time\"", "net dl (bytes)", raw, "download_bytes_now")
 plot_system("net_up.png", start, end, 0, 700000, "\"Time\"", "net up (bytes)", raw, "upload_bytes_now")
-#plot_system("hosts_load05.png", start, end, 0, 8, "Time", "Load (avg 5 min)", systems, "load_avg05")
-#plot_system("hosts_load15.png", start, end, 0, 8, "Time", "Load (avg 15 min)", systems, "load_avg15")
-#plot_system("hosts_memkb.png", start, end, 0, 2*1024*1024, "Time", "Memory (kB)", systems, "memory_kilobyte")
-#plot_system("hosts_swapkb.png", start, end, 0, 2*1024*1024, "Time", "Swap (kB)", systems, "swap_kilobyte")
-

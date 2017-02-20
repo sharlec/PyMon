@@ -12,10 +12,10 @@ plot_system = function (file, start, end, ymin, ymax, xlab, ylab, sys, field){
 	axis.POSIXct(1,as.POSIXct(seq(start,end), origin="1970-01-01"), format="%Y-%m-%d %H:%M:%S")
 	lapply(
 		seq(1,length(sys$server_id)), 
-		function(i) lines(prepare_data(sys, i, field, data.frame(systems$server_id[i])), col=i)
+		function(i) lines(prepare_data(sys, i, field, data.frame(sys$server_id[i])), col=i)
 		# `data.frame(systems$server_id[i])` is needed to enforce evaluation of each iteration
 	)
-	legend("topleft", legend=systems$localhostname, lty=c(1,1), col=c(seq(1, length(systems$server_id))))
+	legend("topleft", legend=sys$localhostname, lty=c(1,1), col=c(seq(1, length(sys$server_id))))
 	dev.off()
 }
 
@@ -37,4 +37,6 @@ plot_system("hosts_load05.png", start, end, 0, 8, "Time", "Load (avg 5 min)", sy
 plot_system("hosts_load15.png", start, end, 0, 8, "Time", "Load (avg 15 min)", systems, "load_avg15")
 plot_system("hosts_memkb.png", start, end, 0, 2*1024*1024, "Time", "Memory (kB)", systems, "memory_kilobyte")
 plot_system("hosts_swapkb.png", start, end, 0, 2*1024*1024, "Time", "Swap (kB)", systems, "swap_kilobyte")
-
+plot_system("hosts_cpuuser.png", start, end, 0, 100, "Time", "CPU (user)", systems, "cpu_user")
+plot_system("hosts_cpusystem.png", start, end, 0, 100, "Time", "CPU (system)", systems, "cpu_system")
+plot_system("hosts_cpuwait.png", start, end, 0, 100, "Time", "CPU (wait)", systems, "cpu_wait")
