@@ -382,6 +382,8 @@ class Process(Service):
 
 
 class Network(Service):
+	date_last = models.PositiveIntegerField(null=True)
+	date = models.TextField(null=True)
 	# TODO: history of these fields?
 	server = models.ForeignKey(Server)
 	state = models.IntegerField(null=True)
@@ -424,6 +426,8 @@ class Network(Service):
 		network.pendingaction = getVal(service, "paddingaction")
 
 		if not getVal(service, "link/state") is None:
+			network.date_last = int(time.time())
+			network.date = json_list_append(network.date, network.date_last)
 
 			network.state = int(getVal(service, "link/state"))
 			network.speed =int(getVal(service, "link/speed"))
