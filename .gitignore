@@ -102,3 +102,10 @@ services.txt
 .idea/
 tmp/
 *.tar.gz
+
+# R artifacts
+*.png
+*.pdf
+*.R*
+*.r.Rout
+				
