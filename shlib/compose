@@ -108,7 +108,7 @@ $(monit)
       - backend
     volumes:
       - static:/var/www/html/static
-      - ./caddy/Caddyfile:/etc/Caddyfile
+      - ./caddy/Caddyfile:/home/caddy/Caddyfile
     ports:
       - "80:80"
 EOF

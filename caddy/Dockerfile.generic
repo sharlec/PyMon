@@ -4,26 +4,28 @@ MAINTAINER Marcel Grossmann <whatever4711@gmail.com>
 ENV arch <ARCH>
 ENV url "https://caddyserver.com/download/build?"
 ENV params "&features=git%2Chugo%2Cipfilter%2Cmailout%2Cprometheus%2Crealip%2Csearch"
-RUN apk add --update --no-cache openssh-client curl git tar
-
-RUN mkdir /caddysrc && CADDYARCH=$(echo "${arch}" | sed -e "s/armhf/arm/g" -e "s/aarch64/arm/g") && \
+RUN apk add --update --no-cache ca-certificates tini git libressl libcap curl && \
+    mkdir /caddysrc && CADDYARCH=$(echo "${arch}" | sed -e "s/armhf/arm/g" -e "s/aarch64/arm/g") && \
     curl -sL -o /caddysrc/caddy_linux_arm.tar.gz "${url}os=linux&arch=${CADDYARCH}${params}" && \
     tar -xf /caddysrc/caddy_linux_arm.tar.gz -C /caddysrc && \
-    mv /caddysrc/caddy /usr/bin/caddy && \
-    chmod 755 /usr/bin/caddy && \
+    mv /caddysrc/caddy /usr/sbin/caddy && \
+    chmod 755 /usr/sbin/caddy && \
     rm -rf /caddysrc && \
-    printf "localhost:80" > /etc/Caddyfile
+    adduser -Du 1000 caddy && \
+    mkdir -p /home/caddy/logs /home/caddy/srv /home/caddy/.caddy/acme && \
+    chown -R caddy:caddy /home/caddy && \
+    setcap 'cap_net_bind_service=+ep' /usr/sbin/caddy && \
+    printf "localhost:80" > /home/caddy/Caddyfile
 
-RUN mkdir -p /srv
-RUN mkdir -p /root/.caddy/acme
 EXPOSE 80 443 2015
 
-WORKDIR /srv
+USER caddy
+WORKDIR /home/caddy/srv
 
-ENTRYPOINT ["/usr/bin/caddy"]
-CMD ["--agree", "--conf", "/etc/Caddyfile"]
+ENTRYPOINT ["/sbin/tini", "--", "/usr/sbin/caddy"]
+CMD ["--agree", "--conf", "/home/caddy/Caddyfile"]
 
 LABEL \
-    version=0.9.3 \
+    version=0.9.5 \
     os="linux" \
     arch="${arch}"
