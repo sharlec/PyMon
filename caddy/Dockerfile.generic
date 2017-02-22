@@ -1,9 +1,8 @@
 FROM <IMAGE>
-MAINTAINER Marcel Grossmann <whatever4711@gmail.com>
 
-ENV arch <ARCH>
-ENV url "https://caddyserver.com/download/build?"
-ENV params "&features=git%2Chugo%2Cipfilter%2Cmailout%2Cprometheus%2Crealip%2Csearch"
+ENV arch=<ARCH> \
+    url="https://caddyserver.com/download/build?" \
+    params="&features=git%2Chugo%2Cipfilter%2Cmailout%2Cprometheus%2Crealip%2Csearch"
 RUN apk add --update --no-cache ca-certificates tini git libressl libcap curl && \
     mkdir /caddysrc && CADDYARCH=$(echo "${arch}" | sed -e "s/armhf/arm/g" -e "s/aarch64/arm/g") && \
     curl -sL -o /caddysrc/caddy_linux_arm.tar.gz "${url}os=linux&arch=${CADDYARCH}${params}" && \
@@ -26,6 +25,7 @@ ENTRYPOINT ["/sbin/tini", "--", "/usr/sbin/caddy"]
 CMD ["--agree", "--conf", "/home/caddy/Caddyfile"]
 
 LABEL \
+    maintainer="whatever4711@gmail.com" \
     version=0.9.5 \
     os="linux" \
     arch="${arch}"
