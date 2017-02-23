@@ -17,7 +17,7 @@ RUN apk add --update --no-cache R R-dev make g++ wget autoconf postgresql-dev \
 	&& echo 'install.packages("sqldf", repos="http://cran.uni-muenster.de/")' | R --no-save
 # RPostgreSQL_0.4-1 is seriously f***ed up...
 
-VOLUME /plots
-WORKDIR /plots
+VOLUME /src /plots
+WORKDIR /src
 
 CMD [ "R" ]

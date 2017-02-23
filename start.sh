@@ -8,7 +8,7 @@ PASSWD=${PASSWD:-1234}
 EMAIL=${EMAIL:-"abc@example.com"}
 
 COMPOSE="docker-compose.yml"
-DEVELOP=true
+RYML="r-docker-compose.yml"
 CREATED=false
 TIMEOUT=10
 
@@ -16,32 +16,30 @@ check_dependencies
 arch
 evaluate_result $? " Detected architecture: ${ARCH}"
 
-function develop(){
+function develop() {
   if [ ! -f ${COMPOSE} ]; then
     info "Starting development environment"
     developyml "${COMPOSE}"
-    DEVELOP=true
     CREATED=true
   else
     info "Restarting previous session"
     info "Clean up if you want to switch between development/deployment"
     CREATED=false
   fi
-  start "${COMPOSE}" "${DEVELOP}" "${CREATED}"
+  start "${COMPOSE}" "${CREATED}"
 }
 
 function deploy() {
   if [ ! -f ${COMPOSE} ]; then
     info "Starting deployment environment"
     deployyml "${COMPOSE}"
-    DEVELOP=true
     CREATED=true
   else
     info "Restarting previous session"
     info "Clean up if you want to switch between development/deployment"
     CREATED=false
   fi
-  start "${COMPOSE}" "${DEVELOP}" "${CREATED}"
+  start "${COMPOSE}" "${CREATED}"
 }
 
 function build() {
@@ -53,8 +51,13 @@ function stop() {
 }
 
 function clean() {
-  docker-compose down -v
-  rm -f "${COMPOSE}"
+  if [ ! -f ${RYML} ]; then
+    docker-compose -f "${COMPOSE}" down -v
+  else
+    docker-compose -f "${COMPOSE}" -f "${RYML}" down -v
+  fi
+  rm -f "${COMPOSE}" "${RYML}"
+  rm -rf src/__pycache__ src/monitcollector/__pycache__ src/monitcollector/migrations
 }
 
 function backup() {
@@ -72,6 +75,11 @@ function restore() {
   docker run --rm -v $PWD/backup:/backup -v djangomonitcollector_pgdata:/data alpine tar xzf /backup/data.tar.gz
 }
 
+function rplot() {
+  ryml "${RYML}"
+  plot "${COMPOSE}" "${RYML}"
+}
+
 function usage(){
 cat << EOM
   usage:
@@ -83,6 +91,7 @@ cat << EOM
   clean         remove everything (invokes stop)
   backup        create DB backup
   restore       restore backup
+  rplot         generate R plots
 
 EOM
 }
@@ -94,8 +103,9 @@ if [ $# -eq 1 ]; then
     "build")    build;;
     "stop")     stop;;
     "clean")    clean;;
-    "backup")     backup;;
-    "restore")    restore;;
+    "backup")   backup;;
+    "restore")  restore;;
+    "rplot")    rplot;;
     *) usage;;
   esac
 else

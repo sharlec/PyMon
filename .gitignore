@@ -95,6 +95,7 @@ src/monitcollector/migrations/*
 # Static files
 src/static/
 docker-compose.yml
+r-docker-compose.yml
 open-m-monit/*
 Dockerfile
 services.txt
@@ -108,4 +109,5 @@ tmp/
 *.pdf
 *.R*
 *.r.Rout
-				
+# R plots
+Rplots/plots/*
