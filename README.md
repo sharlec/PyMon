@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/whatever4711/django-monit-collector.svg?branch=master)](https://travis-ci.org/whatever4711/django-monit-collector)
+
 # django-monit-collector
 
 This is a django project, which collects data from <a href="https://mmonit.com/monit/" target="_blank">monit</a> instances on one or multiple servers, stores them and visualizes them using <a href="http://getbootstrap.com/" target="_blank">bootstrap</a> and the javascript library <a href="http://dygraphs.com/" target="_blank">dygraphs</a>. Example website: http://monitcollector.cfsme-network.de
