@@ -1,37 +1,36 @@
 FROM <IMAGE>
-MAINTAINER Marcel Grossmann <whatever4711@gmail.com>
 
-ENV ARCH <ARCH>
-ENV MONIT_HOME=/etc/monit \
+ENV ARCH=<ARCH> \
+    MONIT_HOME=/etc/monit \
     MONIT_LOG=/var/log/monit \
     PATH=$PATH:/opt/bin \
     DOCKER_SOCK=http://localhost:5000/ \
     APY_HOME=/home/apy
 
+COPY monitrc ${MONIT_HOME}/monitrc
+COPY monitrc.d ${MONIT_HOME}/monitrc.d
+COPY scripts/ ${APY_HOME}/
+
 # Problem with dockerize on AARCH64, need to use armhf-version
 RUN BUILD_DEPS="ca-certificates wget"  && \
-    apk add --update --no-cache ${BUILD_DEPS} monit bash curl python3 && \
+    apk add --update --no-cache ${BUILD_DEPS} monit bash curl python3 tini && \
     DOCKERIZE_ARCH=$(echo "${ARCH}" | sed -e "s/aarch64/armhf/g") && \
     wget -O dockerize.tar.gz https://github.com/jwilder/dockerize/releases/download/v0.3.0/dockerize-linux-${DOCKERIZE_ARCH}-v0.3.0.tar.gz && \
     tar -xzvf dockerize.tar.gz && \
     rm dockerize.tar.gz && \
     mv dockerize /usr/local/bin/ && \
     apk del ${BUILD_DEPS} && \
-    mkdir -p ${MONIT_LOG} ${APY_HOME} ${MONIT_HOME}/monitrc.d
-
-COPY monitrc ${MONIT_HOME}/monitrc
-COPY monitrc.d ${MONIT_HOME}/monitrc.d
-COPY scripts/ ${APY_HOME}/
-
-RUN chmod 700 ${MONIT_HOME}/monitrc && \
+    mkdir -p ${MONIT_LOG} ${APY_HOME} ${MONIT_HOME}/monitrc.d && \
+    chmod 700 ${MONIT_HOME}/monitrc && \
     chmod +x ${APY_HOME}/*.sh ${APY_HOME}/docker-sock.py && \
     rm -f /etc/monitrc && \
     ln -s /etc/monit/monitrc /etc/monitrc && \
     ln -s ${APY_HOME}/monit-start.sh /docker-entrypoint
 
-ENTRYPOINT ["/bin/bash","-c","/docker-entrypoint"]
+ENTRYPOINT ["tini","--", "bash", "-c", "/docker-entrypoint"]
 
 LABEL \
+    maintainer=whatever4711@gmail.com \
     version=5.20.0-r3 \
     os="linux" \
     arch="${ARCH}"

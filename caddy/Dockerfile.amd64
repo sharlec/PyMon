@@ -10,6 +10,8 @@ RUN apk add --update --no-cache ca-certificates tini git libressl libcap curl &&
     mv /caddysrc/caddy /usr/sbin/caddy && \
     chmod 755 /usr/sbin/caddy && \
     rm -rf /caddysrc && \
+    apk del curl && \
+    rm -rf /var/cache/apk/* && \
     adduser -Du 1000 caddy && \
     mkdir -p /home/caddy/logs /home/caddy/srv /home/caddy/.caddy/acme && \
     chown -R caddy:caddy /home/caddy && \
@@ -21,7 +23,7 @@ EXPOSE 80 443 2015
 USER caddy
 WORKDIR /home/caddy/srv
 
-ENTRYPOINT ["/sbin/tini", "--", "/usr/sbin/caddy"]
+ENTRYPOINT ["tini", "--", "caddy"]
 CMD ["--agree", "--conf", "/home/caddy/Caddyfile"]
 
 LABEL \

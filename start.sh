@@ -57,7 +57,7 @@ function clean() {
     docker-compose -f "${COMPOSE}" -f "${RYML}" down -v
   fi
   rm -f "${COMPOSE}" "${RYML}"
-  rm -rf src/__pycache__ src/monitcollector/__pycache__ src/monitcollector/migrations
+  sudo rm -rf src/__pycache__ src/monitcollector/__pycache__ src/monitcollector/migrations
 }
 
 function backup() {
