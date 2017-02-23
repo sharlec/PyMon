@@ -4,5 +4,9 @@ env:
   - GOOS=linux
   - GOARCH=amd64
 
+sudo: required
+services:
+  - docker
+
 script:
   - docker build -t test -f ./src/Dockerfile.amd64 ./src
