@@ -1,4 +1,10 @@
 FROM <IMAGE>
+<QEMU>
+
+ARG BUILD_DATE
+ARG VCS_REF
+ARG VCS_URL
+ARG VERSION
 
 # grab gosu for easy step-down from root
 ENV ARCH=<ARCH> \
@@ -26,8 +32,12 @@ COPY healthcheck.sh /usr/local/bin/
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
   CMD ["healthcheck.sh"]
 
-LABEL \
-  maintainer=whatever4711@gmail.com \
-  version=9.5.6 \
-  os="linux" \
-  arch="${ARCH}"
+LABEL org.label-schema.version=$VERSION \
+    org.label-schema.name="Postgres" \
+    org.label-schema.vcs-ref=$VCS_REF \
+    org.label-schema.vcs-url=$VCS_URL \
+    org.label-schema.build-date=$BUILD_DATE \
+    org.label-schema.schema-version="1.0" \
+    org.label-schema.docker.cmd="docker run -d  whatever4711/postgres:amd64-latest" \
+    org.label-schema.vendor="Marcel Grossmann" \
+    org.label-schema.architecture=$ARCH

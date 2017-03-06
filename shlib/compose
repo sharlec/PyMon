@@ -10,7 +10,7 @@ cat <<-EOF
   monitcollector:
     build:
       context: ${src}
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile 
     image: monitcollector
     volumes:
       - ./src:/usr/src/app

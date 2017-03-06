@@ -11,9 +11,9 @@ function alpine_dockerfile() {
   local generic="${3:-$PWD}/${1}"
   local output="${3:-$PWD}/${2}"
   case ${ARCH} in
-    amd64) sed -e "s|<IMAGE>|${ALPINE_64}|g" -e "s|<ARCH>|${ARCH}|g" "${generic}" > ${output} && return 0;;
-    armhf) sed -e "s|<IMAGE>|${ALPINE_ARM}|g" -e "s|<ARCH>|${ARCH}|g" "${generic}" > ${output} && return 0;;
-    aarch64) sed -e "s|<IMAGE>|${ALPINE_AARCH}|g" -e "s|<ARCH>|${ARCH}|g" "${generic}" > ${output} && return 0;;
+    amd64) sed -e "s|<IMAGE>|${ALPINE_64}|g" -e "s|<ARCH>|${ARCH}|g" -e "s|<QEMU>||g" "${generic}" > ${output} && return 0;;
+    armhf) sed -e "s|<IMAGE>|${ALPINE_ARM}|g" -e "s|<ARCH>|${ARCH}|g" -e "s|<QEMU>||g" "${generic}" > ${output} && return 0;;
+    aarch64) sed -e "s|<IMAGE>|${ALPINE_AARCH}|g" -e "s|<ARCH>|${ARCH}|g" -e "s|<QEMU>||g" "${generic}" > ${output} && return 0;;
     *) return 1;;
   esac
 }
@@ -22,9 +22,9 @@ function python_dockerfile() {
   local generic="${3:-$PWD}/${1}"
   local output="${3:-$PWD}/${2}"
   case ${ARCH} in
-    amd64) sed -e "s|<IMAGE>|${PYTHON_64}|g" -e "s|<ARCH>|${ARCH}|g" "${generic}" > ${output} && return 0;;
-    armhf) sed -e "s|<IMAGE>|${PYTHON_ARM}|g" -e "s|<ARCH>|${ARCH}|g" "${generic}" > ${output} && return 0;;
-    aarch64) sed -e "s|<IMAGE>|${PYTHON_AARCH}|g" -e "s|<ARCH>|${ARCH}|g" "${generic}" > ${output} && return 0;;
+    amd64) sed -e "s|<IMAGE>|${PYTHON_64}|g" -e "s|<ARCH>|${ARCH}|g" -e "s|<QEMU>||g" "${generic}" > ${output} && return 0;;
+    armhf) sed -e "s|<IMAGE>|${PYTHON_ARM}|g" -e "s|<ARCH>|${ARCH}|g" -e "s|<QEMU>||g" "${generic}" > ${output} && return 0;;
+    aarch64) sed -e "s|<IMAGE>|${PYTHON_AARCH}|g" -e "s|<ARCH>|${ARCH}|g" -e "s|<QEMU>||g" "${generic}" > ${output} && return 0;;
     *) return 1;;
   esac
 }

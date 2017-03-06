@@ -1,4 +1,10 @@
 FROM <IMAGE>
+<QEMU>
+
+ARG BUILD_DATE
+ARG VCS_REF
+ARG VCS_URL
+ARG VERSION
 
 ENV arch=<ARCH> \
     url="https://caddyserver.com/download/build?" \
@@ -26,8 +32,12 @@ WORKDIR /home/caddy/srv
 ENTRYPOINT ["tini", "--", "caddy"]
 CMD ["--agree", "--conf", "/home/caddy/Caddyfile"]
 
-LABEL \
-    maintainer="whatever4711@gmail.com" \
-    version=0.9.5 \
-    os="linux" \
-    arch="${arch}"
+LABEL org.label-schema.version=$VERSION \
+    org.label-schema.name="Caddy" \
+    org.label-schema.vcs-ref=$VCS_REF \
+    org.label-schema.vcs-url=$VCS_URL \
+    org.label-schema.build-date=$BUILD_DATE \
+    org.label-schema.schema-version="1.0" \
+    org.label-schema.docker.cmd="docker run -d  whatever4711/caddy:amd64-latest" \
+    org.label-schema.vendor="Marcel Grossmann" \
+    org.label-schema.architecture=$ARCH

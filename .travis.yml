@@ -1,17 +1,8 @@
-env:
-  global:
-  - CGO_ENABLED=0
-  - GOOS=linux
-  - GOARCH=amd64
-
 sudo: required
 services:
   - docker
 
 # Building all docker container based on 64 bit image
 script:
-  - docker build -t caddy -f ./caddy/Dockerfile.amd64 ./caddy
-  - docker build -t monit -f ./monit/Dockerfile.amd64 ./monit
-  - docker build -t monitcollector -f ./src/Dockerfile.amd64 ./src
-  - docker build -t postgres -f ./postgres/Dockerfile.amd64 ./postgres
-  - docker build -t monit -f ./Rplots/Dockerfile ./Rplots
+  - make
+  - docker images

@@ -26,7 +26,7 @@ function info() {
 function arch() {
   case $(uname -m) in
     amd64|x86_64) ARCH="amd64" && return 0;;
-    armv*|armhf) ARCH="armhf" && return 0;;
+    armv*|armhf) ARCH="arm" && return 0;;
     aarch64|amd64) ARCH="aarch64" && return 0;;
     *) ARCH=" Unsupported Architecture" && return 1;;
   esac

@@ -1,4 +1,10 @@
 FROM <IMAGE>
+<QEMU>
+
+ARG BUILD_DATE
+ARG VCS_REF
+ARG VCS_URL
+ARG VERSION
 
 ENV ARCH <ARCH>
 COPY ./requirements.txt .
@@ -23,3 +29,13 @@ WORKDIR /usr/src/app
 
 VOLUME ["/usr/src/logs/","/usr/src/app/static"]
 ENTRYPOINT ["tini", "--", "pythonstart.sh"]
+
+LABEL org.label-schema.version=$VERSION \
+    org.label-schema.name="Monitcollector" \
+    org.label-schema.vcs-ref=$VCS_REF \
+    org.label-schema.vcs-url=$VCS_URL \
+    org.label-schema.build-date=$BUILD_DATE \
+    org.label-schema.schema-version="1.0" \
+    org.label-schema.docker.cmd="docker run -d -e LISTEN_PORT=8000 -p 8000:8000  whatever4711/monitcollector:amd64-latest" \
+    org.label-schema.vendor="Marcel Grossmann" \
+    org.label-schema.architecture=$ARCH
