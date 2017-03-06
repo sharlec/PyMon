@@ -1,4 +1,4 @@
-service := caddy postgres monitcollector
+service := caddy postgres monit src
 
 .PHONY: all $(service)
 
