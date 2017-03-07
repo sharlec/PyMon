@@ -15,7 +15,7 @@ COPY ./pythonstart.sh /usr/local/bin/
 RUN BUILD_DEPS="ca-certificates wget" && \
     DOCKERIZE_ARCH=$(echo "${ARCH}" | sed -e "s/aarch64/armhf/g") && \
     apk add --update --no-cache postgresql-client postgresql-dev sqlite g++ gcc libxslt-dev tini ${BUILD_DEPS} && \
-    pip -v install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir -r requirements.txt && \
     wget -O dockerize.tar.gz https://github.com/jwilder/dockerize/releases/download/v0.3.0/dockerize-linux-${DOCKERIZE_ARCH}-v0.3.0.tar.gz && \
     tar -xzvf dockerize.tar.gz && \
     rm dockerize.tar.gz && \
