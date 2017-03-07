@@ -5,4 +5,4 @@ service := caddy postgres monit src
 all: $(service)
 
 $(service):
-	$(MAKE) -C $@ all
+	$(MAKE) -j 1 -C $@ all

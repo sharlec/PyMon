@@ -1,12 +1,8 @@
-env:
-  global:
-    - TIMEOUT=30000
-
 sudo: required
 services:
   - docker
 
 # Building all docker container based on 64 bit image
 script:
-  - make -j 4
+  - travis_wait 30 make -j 4
   - docker images
