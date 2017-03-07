@@ -7,6 +7,6 @@ script:
   - make caddy
   - make postgres
   - make monit
-  - make architecture=amd64 src
-  - make architecture=armhf src
+  - travis_retry make architecture=amd64 src
+  - travis_retry make architecture=armhf src
   - docker images
