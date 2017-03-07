@@ -1,8 +1,12 @@
+env:
+  global:
+    - TIMEOUT=30000
+
 sudo: required
 services:
   - docker
 
 # Building all docker container based on 64 bit image
 script:
-  - make src
+  - make -j 4
   - docker images
