@@ -8,5 +8,5 @@ services:
 
 # Building all docker container based on 64 bit image
 script:
-  - travis_wait 30 make
+  - make src
   - docker images
