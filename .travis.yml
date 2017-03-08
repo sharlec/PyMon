@@ -4,10 +4,8 @@ services:
 
 # Building all docker container based on 64 bit image
 script:
-  - make caddy
-  - make postgres
-  - make monit
-  - travis_wait make architecture=amd64 src
-  - travis_wait make architecture=armhf src
+  - make -j 3 caddy postgres monit
+  - travis_wait 30 make architecture=amd64 src
+  - travis_wait 30 make architecture=armhf src
   - travis_wait 30 make architecture=aarch64 src
   - docker images
