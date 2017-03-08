@@ -18,6 +18,7 @@ else
 	endif
 endif
 
+.NOTPARALLEL: all
 
 all: $(ARCHITECTURES)
 
@@ -36,7 +37,7 @@ $(ARCHITECTURES):
 			--build-arg VCS_URL=$(shell git config --get remote.origin.url) \
 			--build-arg VERSION="5.20.0-r3" \
 			-f $(TMP_DOCKERFILE) -t $(REPO):$@-$(TAG) .
-	@rm -rf $(TMP_DIR) $(TMP_DOCKERFILE)
+	@$(MAKE) clean
 
 # To adjust for local registry
 push:
