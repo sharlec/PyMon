@@ -5,15 +5,12 @@ PLOT=r-docker-compose.yml
 
 function monitcollector() {
   local src="./src"
-  python_dockerfile Dockerfile.generic Dockerfile ${src}
+
 cat <<-EOF
   monitcollector:
-    build:
-      context: ${src}
-      dockerfile: Dockerfile 
-    image: monitcollector
+    image: monitcollector:${ARCH}-latest
     volumes:
-      - ./src:/usr/src/app
+      - ${src}:/usr/src/app
 EOF
 }
 
@@ -28,27 +25,23 @@ EOF
 
 function monit() {
   local src="./monit"
-  alpine_dockerfile Dockerfile.generic Dockerfile ${src}
   cat <<-EOF
   monit:
-    build:
-      context: ${src}
-      dockerfile: Dockerfile
-    image: monit
+    image: monit:${ARCH}-latest
     privileged: True
     network_mode: "host"
     volumes:
-      - ./monit/monitrc.d/basic:/etc/monit/monitrc.d/basic
+      - ${src}/monitrc.d/basic:/etc/monit/monitrc.d/basic
       - /var/run/docker.sock:/var/run/docker.sock
 EOF
 }
 
 function deployyml() {
   local RUN="${1}"
-  local db="./postgres"
-  alpine_dockerfile Dockerfile.generic Dockerfile ${db}
   local caddy="./caddy"
-  alpine_dockerfile Dockerfile.generic Dockerfile ${caddy}
+
+  make architectures=${ARCH} src monit postgres caddy
+
 cat<<-EOF > "${RUN}"
 version: '3'
 
@@ -66,10 +59,7 @@ networks:
 
 services:
   db:
-    build:
-      context: ${db}
-      dockerfile: Dockerfile
-    image: postgres
+    image: postgres:${ARCH}-latest
     restart: always
     volumes:
       - pgdata:/var/lib/postgresql/data
@@ -99,17 +89,14 @@ $(monit)
     entrypoint: ["tini", "--", "dockerize", "-wait", "http://localhost", "-timeout", "3600s", "bash","-c","/docker-entrypoint"]
 
   caddy:
-    build:
-      context: ${caddy}
-      dockerfile: Dockerfile
-    image: caddy
+    image: caddy:${ARCH}-latest
     restart: always
     networks:
       - internal
       - backend
     volumes:
       - static:/var/www/html/static
-      - ./caddy/Caddyfile:/home/caddy/Caddyfile
+      - ${caddy}/Caddyfile:/home/caddy/Caddyfile
     ports:
       - "80:80"
 EOF
@@ -137,6 +124,7 @@ EOF
 
 function developyml() {
   local RUN="${1}"
+  make architectures=${ARCH} src monit
 
 cat<<-EOF > "${RUN}"
 version: '3'

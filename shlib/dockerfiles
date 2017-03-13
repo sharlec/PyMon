@@ -1,5 +1,5 @@
 #!/bin/sh
-
+# TODO: deprecated - Using Multiarch Makefiles 
 ALPINE_64="alpine:edge"
 PYTHON_64="python:3.6-alpine"
 ALPINE_ARM="armhf/alpine:edge"

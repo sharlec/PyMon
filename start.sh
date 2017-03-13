@@ -1,5 +1,4 @@
 #!/bin/bash
-source shlib/dockerfiles
 source shlib/compose
 source shlib/checks
 
@@ -86,7 +85,6 @@ cat << EOM
 
   develop       initialize service with a simple sqlitedb
   deploy        initialize service with a postgres db and a caddy server
-  build         rebuild all docker images
   stop          stop the application
   clean         remove everything (invokes stop)
   backup        create DB backup
@@ -100,7 +98,6 @@ if [ $# -eq 1 ]; then
   case "$1" in
     "develop")  develop;;
     "deploy")   deploy;;
-    "build")    build;;
     "stop")     stop;;
     "clean")    clean;;
     "backup")   backup;;

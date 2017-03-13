@@ -1,12 +1,11 @@
-env:
-  global:
-    - MAKEFLAGS="-j 4"
-
 sudo: required
 services:
   - docker
 
 # Building all docker container based on 64 bit image
 script:
-  - travis_wait 30 make
+  - make -j 3 caddy postgres monit
+  - travis_wait make architectures=amd64 src
+  - travis_wait make architectures=armhf src
+  - travis_wait 30 make architectures=aarch64 src
   - docker images
