@@ -17,3 +17,7 @@ script:
 after_success:
 - docker images
 - make push_all
+- curl -X POST https://hooks.microbadger.com/images/whatever4711/caddy/sFGLgrc2bLHyra3wt4m519VFgLE=
+- curl -X POST https://hooks.microbadger.com/images/whatever4711/postgres/nmmIZPMYhvqLv_lvb1dau0Xlems=
+- curl -X POST https://hooks.microbadger.com/images/whatever4711/monit/oX7Ez6hVS9YABvXnuKg8VIctkJo=
+- curl -X POST https://hooks.microbadger.com/images/whatever4711/pymon/9P4clksrz5uYyBnxDsV7DLY0pk0=

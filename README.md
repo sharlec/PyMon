@@ -1,10 +1,16 @@
 [![Build Status](https://travis-ci.org/whatever4711/PyMon.svg?branch=master)](https://travis-ci.org/whatever4711/PyMon)
 
-# django-monit-collector
+[![](https://images.microbadger.com/badges/version/whatever4711/pymon:amd64-latest.svg)](https://microbadger.com/images/whatever4711/pymon:amd64-latest "Get your own version badge on microbadger.com") [![](https://images.microbadger.com/badges/image/whatever4711/pymon:amd64-latest.svg)](https://microbadger.com/images/whatever4711/pymon:amd64-latest "Get your own image badge on microbadger.com") [![](https://images.microbadger.com/badges/commit/whatever4711/pymon:amd64-latest.svg)](https://microbadger.com/images/whatever4711/pymon:amd64-latest "Get your own commit badge on microbadger.com")
 
-This is a django project, which collects data from <a href="https://mmonit.com/monit/" target="_blank">monit</a> instances on one or multiple servers, stores them and visualizes them using <a href="http://getbootstrap.com/" target="_blank">bootstrap</a> and the javascript library <a href="http://dygraphs.com/" target="_blank">dygraphs</a>. Example website: http://monitcollector.cfsme-network.de
+[![](https://images.microbadger.com/badges/version/whatever4711/pymon:armhf-latest.svg)](https://microbadger.com/images/whatever4711/pymon:armhf-latest "Get your own version badge on microbadger.com") [![](https://images.microbadger.com/badges/image/whatever4711/pymon:armhf-latest.svg)](https://microbadger.com/images/whatever4711/pymon:armhf-latest "Get your own image badge on microbadger.com") [![](https://images.microbadger.com/badges/commit/whatever4711/pymon:armhf-latest.svg)](https://microbadger.com/images/whatever4711/pymon:armhf-latest "Get your own commit badge on microbadger.com")
 
-There is a very similar app for the server monitoring tool <a href="https://github.com/Supervisor/supervisor" target="_blank">supervisor</a> called <a href="https://github.com/nleng/djangovisor" target="_blank">djangovisor</a>.
+[![](https://images.microbadger.com/badges/version/whatever4711/pymon:aarch64-latest.svg)](https://microbadger.com/images/whatever4711/pymon:aarch64-latest "Get your own version badge on microbadger.com") [![](https://images.microbadger.com/badges/image/whatever4711/pymon:aarch64-latest.svg)](https://microbadger.com/images/whatever4711/pymon:aarch64-latest "Get your own image badge on microbadger.com") [![](https://images.microbadger.com/badges/commit/whatever4711/pymon:aarch64-latest.svg)](https://microbadger.com/images/whatever4711/pymon:aarch64-latest "Get your own commit badge on microbadger.com")
+
+# PyMon
+
+This is a django project, which collects data from [monit](https://mmonit.com/monit) instances on one or multiple servers, stores them and visualizes them using [bootstrap](http://getbootstrap.com/) and the javascript library [dygraphs](http://dygraphs.com/).
+
+There is a very similar app for the server monitoring tool [supervisor](https://github.com/Supervisor/supervisor) called [djangovisor](https://github.com/nleng/djangovisor).
 
 
 ### Features
