@@ -6,7 +6,11 @@ TMP_DIR := tmp
 TMP_DOCKERFILE := Dockerfile.generated
 
 ifeq ($(REPO),)
+ifeq ($(USER),)
   REPO := postgres
+else
+  REPO := $(USER)/postgres
+endif
 endif
 ifeq ($(TRAVIS_BRANCH),)
 	TAG := latest
