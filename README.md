@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/whatever4711/django-monit-collector.svg?branch=master)](https://travis-ci.org/whatever4711/django-monit-collector)
+[![Build Status](https://travis-ci.org/whatever4711/PyMon.svg?branch=master)](https://travis-ci.org/whatever4711/PyMon)
 
 # django-monit-collector
 
