@@ -6,7 +6,11 @@ TMP_DIR := tmp
 TMP_DOCKERFILE := Dockerfile.generated
 
 ifeq ($(REPO),)
-  REPO := monitcollector
+ifeq ($(USER),)
+  REPO := pymon
+else
+  REPO := $(USER)/pymon
+endif
 endif
 ifeq ($(TRAVIS_BRANCH),)
 	TAG := latest

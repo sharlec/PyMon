@@ -1,11 +1,23 @@
 sudo: required
+language: bash
 services:
-  - docker
-
-# Building all docker container based on 64 bit image
+- docker
+notifications:
+  email: false
+  slack:
+    on_success: always
+    on_failure: change
+    secure: 08ax3nyDA7Jhygin2LgFixfQJGipV1dUE+XPIgdz6V0TJaOhz+Ay2S9NDPcyzQLdWjk89behL7kDg4TwjooaGMy8X42IThJUHzy0ucjjte0cruEuqBFTl3rh8KvQtrisKvcNayQ9P1d6nNtzzJ+7wsIlQ4ybD97yH0rFlq4o524r83ogt0kqDJVp1lL5hWFWaDDKUKSIkxrHvYSUnQ9UqrtaTPqBgplx7l96dyELbetELO+pgdoz7b5di9EkJiOlGTts11SwZ1UTk+GFIuzg5W+kf7p/x6CHJpVKruH9mitgwwz+69KWXPq4RB4RSnWDyM9w+xLMrbWPm8Ma8ktd05DJMPtJdkNiHmRIOnOPWkW/SVOaMBhhWO3d1jXDUH4IkxF9EqH8RS6HmVNyYXF70iBMYtT9UDjIxN0uNZnRGji8GMMf6VmV5lNQeaZVbs+8MHCL/HKRQb2p7khKi+j7Atk7zZUxyIOJGlBfsAx/bkqe5nVy0KUs6Hb2ntn87FCbpAZxZ1RJ/E3X/BSxkwhm7Qsu2zYBjHBJy+rN2PgRXud6v079ni6lGuUBGgRIrRho0lTjfFQht9pYNw2mneMCds6+2YUButZT8ySoQanwkRWeSk4LnfWfAm1TzFspjl7MHEulR90GksFRXNXDQgml1U+84Csy7oHXS+ipY/Osc7E=
 script:
-  - make -j 3 caddy postgres monit
-  - travis_wait make architectures=amd64 src
-  - travis_wait make architectures=armhf src
-  - travis_wait 30 make architectures=aarch64 src
-  - docker images
+- export USER=whatever4711
+- make -j 3 caddy postgres monit
+- travis_wait make architectures=amd64 src
+- travis_wait make architectures=armhf src
+- travis_wait 30 make architectures=aarch64 src
+after_success:
+- docker images
+- make push_all
+- curl -X POST https://hooks.microbadger.com/images/whatever4711/caddy/sFGLgrc2bLHyra3wt4m519VFgLE=
+- curl -X POST https://hooks.microbadger.com/images/whatever4711/postgres/nmmIZPMYhvqLv_lvb1dau0Xlems=
+- curl -X POST https://hooks.microbadger.com/images/whatever4711/monit/oX7Ez6hVS9YABvXnuKg8VIctkJo=
+- curl -X POST https://hooks.microbadger.com/images/whatever4711/pymon/9P4clksrz5uYyBnxDsV7DLY0pk0=

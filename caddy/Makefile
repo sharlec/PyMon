@@ -5,9 +5,12 @@ MULTIARCH := multiarch/qemu-user-static:register
 TMP_DIR := tmp
 TMP_DOCKERFILE := Dockerfile.generated
 ifeq ($(REPO),)
+ifeq ($(USER),)
   REPO := caddy
+else
+  REPO := $(USER)/caddy
 endif
-
+endif
 ifeq ($(TRAVIS_BRANCH),)
 	TAG := latest
 else
