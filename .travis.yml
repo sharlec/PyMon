@@ -11,9 +11,7 @@ notifications:
 script:
 - export USER=whatever4711
 - make -j 3 caddy postgres monit
-- travis_wait make architectures=amd64 src
-- travis_wait 20 make architectures=armhf src
-- travis_wait 20 make architectures=aarch64 src
+- travis_wait 20 make src
 after_success:
 - docker images
 - make push_all
