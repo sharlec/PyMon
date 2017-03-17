@@ -52,6 +52,7 @@ MONIT_PORT = config('MONIT_PORT', default=2821, cast=int)
 # Application definition
 
 INSTALLED_APPS = (
+    'django_extensions',
     'monitcollector',
     'compressor',
     'django.contrib.admin',

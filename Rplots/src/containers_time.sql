@@ -1,7 +1,9 @@
 SELECT
-	monitcollector_server.localhostname,
+  monitcollector_container.docker_id,
 	monitcollector_container.name,
-	monitcollector_container.date
+	monitcollector_container.date,
+	monitcollector_container.cpu,
+	monitcollector_container.memory
 FROM
 	public.monitcollector_system,
 	public.monitcollector_server,
@@ -16,16 +18,3 @@ WHERE
 ORDER BY
 	monitcollector_server.localhostname ASC; 
 
-/*
-SELECT 
-	monitcollector_server.localhostname, 
-	monitcollector_container.name,
-monitcollector_container.date
-FROM 
-	monitcollector_container, 
-	monitcollector_process, 
-	monitcollector_server
-WHERE 
-	monitcollector_container.process_id = monitcollector_process.service_ptr_id AND
-	monitcollector_server.id = monitcollector_process.server_id;
-  */

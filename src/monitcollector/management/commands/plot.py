@@ -3,6 +3,8 @@ from django.core.management.base import BaseCommand, CommandError
 from monitcollector import models
 
 import numpy as np
+import matplotlib as mpl
+mpl.use('Agg')
 import matplotlib.pyplot as plt
 from collections import defaultdict, OrderedDict
 import json

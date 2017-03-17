@@ -60,18 +60,22 @@ function clean() {
 }
 
 function backup() {
+  local orgdir="${PWD##*/}"
+  local dir="${orgdir//[-]/}"
   mkdir -p backup
 
   # TODO For Postgres
-  docker run --rm -v $PWD/backup:/backup -v djangomonitcollector_pgdata:/data $(alpine) tar czf /backup/postgres.tar.gz data
+  docker run --rm -v $PWD/backup:/backup -v ${dir}_pgdata:/data $(alpine) tar czf /backup/postgres.tar.gz data
   # TODO For SQLite
-  docker run --rm -v $PWD/backup:/backup -v djangomonitcollector_sqlitedb:/data $(alpine) tar czf /backup/sqlite.tar.gz data
+  docker run --rm -v $PWD/backup:/backup -v ${dir}_sqlitedb:/data $(alpine) tar czf /backup/sqlite.tar.gz data
   sudo chown -R $UID backup
 }
 
 function restore() {
+  local orgdir="${PWD##*/}"
+  local dir="${orgdir//[-]/}"
   # TODO container name
-  docker run --rm -v $PWD/backup:/backup -v djangomonitcollector_pgdata:/data alpine tar xzf /backup/data.tar.gz
+  docker run --rm -v $PWD/backup:/backup -v ${dir}_pgdata:/data alpine tar xzf /backup/data.tar.gz
 }
 
 function rplot() {

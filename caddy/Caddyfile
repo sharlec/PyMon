@@ -1,6 +1,6 @@
 # Caddyfile
 
-http://141.13.92.2 http://localhost {
+*:80 {
   tls off
   root /var/www/html
   proxy / monitcollector:8000 {

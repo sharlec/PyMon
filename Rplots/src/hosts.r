@@ -7,9 +7,9 @@ prepare_data = function(sys, i, field, x){
 }
 
 plot_system = function (file, start, end, ymin, ymax, xlab, ylab, sys, field){
-	png(file=file)
-	plot(c(start,end), c(ymin, ymax), type="n", xlab=xlab, ylab=ylab)
-	axis.POSIXct(1,as.POSIXct(seq(start,end), origin="1970-01-01"), format="%Y-%m-%d %H:%M:%S")
+	png(file=file, width=700, height=350)
+	plot(c(start,end), c(ymin, ymax), type="n", xlab=xlab, ylab=ylab, xaxt="n")
+	axis.POSIXct(1,as.POSIXct(seq(start,end), origin="1970-01-01", by="minute"), format="%H:%M", las="2")
 	lapply(
 		seq(1,length(sys$server_id)), 
 		function(i) lines(prepare_data(sys, i, field, data.frame(sys$server_id[i])), col=i)
@@ -25,18 +25,20 @@ systems <- sqldf("select monitcollector_server.localhostname,monitcollector_syst
 # unix -> Date: as.POSIXct(timestamp, origin="1970-01-01")
 # Date -> unix: as.numeric(as.POSIXct("2017-02-19 17:51:17 CET"))
 # current: as.numeric(Sys.time())
-start_max = as.numeric(as.POSIXct("2017-02-03 18:00:00 CET"))
-end_max = as.numeric(as.POSIXct("2017-02-08 12:00:00 CET"))
+#start_max = as.numeric(as.POSIXct("2017-03-16 09:30:00 CET"))
+#end_max = as.numeric(as.POSIXct("2017-03-16 10:00:00 CET"))
 start = start
 end = end
-start = as.numeric(as.POSIXct("2017-02-06 17:53:20 CET"))
-end = as.numeric(as.POSIXct("2017-02-07 21:40:00 CET"))
+start = as.numeric(as.POSIXct("2017-03-16 10:10:00 CET"))
+end = as.numeric(as.POSIXct("2017-03-16 13:10:00 CET"))
 
 plot_system("hosts_load01.png", start, end, 0, 8, "Time", "Load (avg 1 min)", systems, "load_avg01")
 plot_system("hosts_load05.png", start, end, 0, 8, "Time", "Load (avg 5 min)", systems, "load_avg05")
 plot_system("hosts_load15.png", start, end, 0, 8, "Time", "Load (avg 15 min)", systems, "load_avg15")
-plot_system("hosts_memkb.png", start, end, 0, 2*1024*1024, "Time", "Memory (kB)", systems, "memory_kilobyte")
-plot_system("hosts_swapkb.png", start, end, 0, 2*1024*1024, "Time", "Swap (kB)", systems, "swap_kilobyte")
-plot_system("hosts_cpuuser.png", start, end, 0, 100, "Time", "CPU (user)", systems, "cpu_user")
-plot_system("hosts_cpusystem.png", start, end, 0, 100, "Time", "CPU (system)", systems, "cpu_system")
-plot_system("hosts_cpuwait.png", start, end, 0, 100, "Time", "CPU (wait)", systems, "cpu_wait")
+plot_system("hosts_mem.png", start, end, 0, 40, "Time", "Memory (%)", systems, "memory_percent")
+plot_system("hosts_swap.png", start, end, 0, 1, "Time", "Swap (%)", systems, "swap_percent")
+plot_system("hosts_memkb.png", start, end, 0, 512*1024, "Time", "Memory (B)", systems, "memory_kilobyte")
+plot_system("hosts_swapkb.png", start, end, 0, 2*1024*1024, "Time", "Swap (B)", systems, "swap_kilobyte")
+plot_system("hosts_cpuuser.png", start, end, 0, 50, "Time", "CPU (user)", systems, "cpu_user")
+plot_system("hosts_cpusystem.png", start, end, 0, 50, "Time", "CPU (system)", systems, "cpu_system")
+plot_system("hosts_cpuwait.png", start, end, 0, 50, "Time", "CPU (wait)", systems, "cpu_wait")
