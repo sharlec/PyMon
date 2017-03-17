@@ -29,16 +29,16 @@ systems <- sqldf("select monitcollector_server.localhostname,monitcollector_syst
 #end_max = as.numeric(as.POSIXct("2017-03-16 10:00:00 CET"))
 start = start
 end = end
-start = as.numeric(as.POSIXct("2017-03-16 10:10:00 CET"))
-end = as.numeric(as.POSIXct("2017-03-16 13:10:00 CET"))
+start = as.numeric(as.POSIXct("2017-03-16 14:10:00 CET"))
+end = as.numeric(as.POSIXct("2017-03-16 17:10:00 CET"))
 
 plot_system("hosts_load01.png", start, end, 0, 8, "Time", "Load (avg 1 min)", systems, "load_avg01")
 plot_system("hosts_load05.png", start, end, 0, 8, "Time", "Load (avg 5 min)", systems, "load_avg05")
 plot_system("hosts_load15.png", start, end, 0, 8, "Time", "Load (avg 15 min)", systems, "load_avg15")
-plot_system("hosts_mem.png", start, end, 0, 40, "Time", "Memory (%)", systems, "memory_percent")
+plot_system("hosts_mem.png", start, end, 0, 15, "Time", "Memory (%)", systems, "memory_percent")
 plot_system("hosts_swap.png", start, end, 0, 1, "Time", "Swap (%)", systems, "swap_percent")
 plot_system("hosts_memkb.png", start, end, 0, 512*1024, "Time", "Memory (B)", systems, "memory_kilobyte")
 plot_system("hosts_swapkb.png", start, end, 0, 2*1024*1024, "Time", "Swap (B)", systems, "swap_kilobyte")
-plot_system("hosts_cpuuser.png", start, end, 0, 50, "Time", "CPU (user)", systems, "cpu_user")
-plot_system("hosts_cpusystem.png", start, end, 0, 50, "Time", "CPU (system)", systems, "cpu_system")
-plot_system("hosts_cpuwait.png", start, end, 0, 50, "Time", "CPU (wait)", systems, "cpu_wait")
+plot_system("hosts_cpuuser.png", start, end, 0, 3, "Time", "CPU (user)", systems, "cpu_user")
+plot_system("hosts_cpusystem.png", start, end, 0, 3, "Time", "CPU (system)", systems, "cpu_system")
+plot_system("hosts_cpuwait.png", start, end, 0, 3, "Time", "CPU (wait)", systems, "cpu_wait")

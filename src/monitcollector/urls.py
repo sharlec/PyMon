@@ -22,6 +22,7 @@ urlpatterns = [
     url(r'^$', views.dashboard, name='dashboard'),
     url(r'^dashboard/$', views.dashboard, name='dashboard'),
     url(r'^collector$', views.collector, name='collector'),
+    url(r'^plot/$', views.plot, name='plot'),
     url(r'^server/(?P<server_id>\d+)/$', views.server, name='server'),
     url(r'^server/(?P<server_id>\w+)/process/(?P<process_name>[^/]+)/$', views.process, name='process'),
     url(r'^process_action/(?P<server_id>\d+)/$', views.process_action, name='process_action'),

@@ -8,7 +8,7 @@ function monitcollector() {
 
 cat <<-EOF
   monitcollector:
-    image: monitcollector:${ARCH}-latest
+    image: ${USER}/pymon:${ARCH}-latest
     volumes:
       - ${src}:/usr/src/app
 EOF
@@ -27,7 +27,7 @@ function monit() {
   local src="./monit"
   cat <<-EOF
   monit:
-    image: monit:${ARCH}-latest
+    image: ${USER}/monit:${ARCH}-latest
     privileged: True
     network_mode: "host"
     volumes:
@@ -59,7 +59,7 @@ networks:
 
 services:
   db:
-    image: postgres:${ARCH}-latest
+    image: ${USER}/postgres:${ARCH}-latest
     restart: always
     volumes:
       - pgdata:/var/lib/postgresql/data
@@ -89,7 +89,7 @@ $(monit)
     entrypoint: ["tini", "--", "dockerize", "-wait", "http://localhost", "-timeout", "3600s", "bash","-c","/docker-entrypoint"]
 
   caddy:
-    image: caddy:${ARCH}-latest
+    image: ${USER}/caddy:${ARCH}-latest
     restart: always
     networks:
       - internal

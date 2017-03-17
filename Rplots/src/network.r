@@ -29,12 +29,12 @@ raw = sqldf(paste(readLines("network.sql"),collapse=" "), connection=connection)
 # unix -> Date: as.POSIXct(timestamp, origin="1970-01-01")
 # Date -> unix: as.numeric(as.POSIXct("2017-02-19 17:51:17 CET"))
 # current: as.numeric(Sys.time())
-start_max = as.numeric(as.POSIXct("2017-03-16 10:00:00 CET"))
-end_max = as.numeric(as.POSIXct("2017-03-16 11:00:00 CET"))
+start_max = as.numeric(as.POSIXct("2017-03-16 15:00:00 CET"))
+end_max = as.numeric(as.POSIXct("2017-03-16 16:00:00 CET"))
 start = start_max
 end = end_max
 #start = as.numeric(as.POSIXct("2017-02-06 17:53:20 CET"))
 #end = as.numeric(as.POSIXct("2017-02-07 21:40:00 CET"))
 
-plot_system("net_down.png", start, end, 0, 4000, "", "Download (bytes)", raw, "download_bytes_now")
-plot_system("net_up.png", start, end, 0, 4000, "", "Upload (bytes)", raw, "upload_bytes_now")
+plot_system("net_down.png", start, end, 0, 2000, "", "Download (bytes)", raw, "download_bytes_now")
+plot_system("net_up.png", start, end, 0, 2000, "", "Upload (bytes)", raw, "upload_bytes_now")
