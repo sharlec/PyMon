@@ -12,9 +12,9 @@ COPY ./gunicornup.sh /usr/local/bin/
 COPY ./pythonstart.sh /usr/local/bin/
 
 # Problem with dockerize on AARCH64, need to use armhf-version
-RUN BUILD_DEPS="ca-certificates wget postgresql-dev musl-dev linux-headers libxslt-dev gcc g++ libpng-dev" && \
+RUN BUILD_DEPS="ca-certificates wget postgresql-dev musl-dev linux-headers libxslt-dev gcc g++ libpng-dev freetype-dev" && \
     DOCKERIZE_ARCH=$(echo "${ARCH}" | sed -e "s/aarch64/armhf/g") && \
-    apk add --update --no-cache postgresql-client sqlite tini ${BUILD_DEPS} && \
+    apk add --update --no-cache postgresql-client sqlite tini libpng freetype ${BUILD_DEPS} && \
     ln -s /usr/include/locale.h /usr/include/xlocale.h && \
     pip install --no-cache-dir -r requirements.txt && \
     wget -O dockerize.tar.gz https://github.com/jwilder/dockerize/releases/download/v0.3.0/dockerize-linux-${DOCKERIZE_ARCH}-v0.3.0.tar.gz && \
