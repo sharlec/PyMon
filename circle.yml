@@ -4,8 +4,8 @@ machine:
 
 test:
   override:
-    - make -j 3 caddy postgres monit
-    - make src
+    - sudo make -j 3 caddy postgres monit
+    - sudo make src
     - docker images
 #    - cp *.deb $CIRCLE_ARTIFACTS
 
