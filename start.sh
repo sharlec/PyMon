@@ -5,6 +5,8 @@ source shlib/checks
 ADMIN=${ADMIN:-admin}
 PASSWD=${PASSWD:-1234}
 EMAIL=${EMAIL:-"abc@example.com"}
+REPO=${REPO:-"whatever4711"}
+BUILD=${BUILD:-false}
 
 COMPOSE="docker-compose.yml"
 RYML="r-docker-compose.yml"
@@ -18,6 +20,9 @@ evaluate_result $? " Detected architecture: ${ARCH}"
 function develop() {
   if [ ! -f ${COMPOSE} ]; then
     info "Starting development environment"
+    if [[ "$BUILD" == "true" ]]; then
+      make architectures=${ARCH} src monit
+    fi
     developyml "${COMPOSE}"
     CREATED=true
   else
@@ -31,6 +36,9 @@ function develop() {
 function deploy() {
   if [ ! -f ${COMPOSE} ]; then
     info "Starting deployment environment"
+    if [[ "$BUILD" == "true" ]]; then
+      make architectures=${ARCH} src monit postgres caddy
+    fi
     deployyml "${COMPOSE}"
     CREATED=true
   else

@@ -8,7 +8,7 @@ function monitcollector() {
 
 cat <<-EOF
   monitcollector:
-    image: ${USER}/pymon:${ARCH}-latest
+    image: ${REPO}/pymon:${ARCH}-latest
     volumes:
       - ${src}:/usr/src/app
 EOF
@@ -27,7 +27,7 @@ function monit() {
   local src="./monit"
   cat <<-EOF
   monit:
-    image: ${USER}/monit:${ARCH}-latest
+    image: ${REPO}/monit:${ARCH}-latest
     privileged: True
     network_mode: "host"
     volumes:
@@ -39,8 +39,6 @@ EOF
 function deployyml() {
   local RUN="${1}"
   local caddy="./caddy"
-
-  make architectures=${ARCH} src monit postgres caddy
 
 cat<<-EOF > "${RUN}"
 version: '3'
@@ -59,7 +57,7 @@ networks:
 
 services:
   db:
-    image: ${USER}/postgres:${ARCH}-latest
+    image: ${REPO}/postgres:${ARCH}-latest
     restart: always
     volumes:
       - pgdata:/var/lib/postgresql/data
@@ -89,7 +87,7 @@ $(monit)
     entrypoint: ["tini", "--", "dockerize", "-wait", "http://localhost", "-timeout", "3600s", "bash","-c","/docker-entrypoint"]
 
   caddy:
-    image: ${USER}/caddy:${ARCH}-latest
+    image: ${REPO}/caddy:${ARCH}-latest
     restart: always
     networks:
       - internal
@@ -124,7 +122,6 @@ EOF
 
 function developyml() {
   local RUN="${1}"
-  make architectures=${ARCH} src monit
 
 cat<<-EOF > "${RUN}"
 version: '3'
@@ -158,11 +155,11 @@ function start() {
   #local service=monitcollector
   #local name="${dir}_${service}_1"
 
-  if [[ "$created" == "true" ]]; then
-    docker-compose -f "${yml}" up --force-recreate --build -d
-  else
+  #if [[ "$created" == "true" ]]; then
+  #  docker-compose -f "${yml}" up --force-recreate --build -d
+  #else
     docker-compose -f "${yml}" up -d
-  fi
+  #fi
 
   info "To stop the container again execute"
   info "docker-compose down -v"
