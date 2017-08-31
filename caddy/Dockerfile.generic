@@ -7,11 +7,11 @@ ARG VCS_URL
 ARG VERSION
 
 ENV arch=<ARCH> \
-    url="https://caddyserver.com/download/build?" \
-    params="&features=git%2Chugo%2Cipfilter%2Cmailout%2Cprometheus%2Crealip%2Csearch"
+    url="https://caddyserver.com/download/linux/" \
+    params="http.filter,http.git,http.hugo,http.ipfilter,http.mailout,http.prometheus,http.realip"
 RUN apk add --update --no-cache ca-certificates tini git libressl libcap curl && \
-    mkdir /caddysrc && CADDYARCH=$(echo "${arch}" | sed -e "s/armhf/arm/g" -e "s/aarch64/arm/g") && \
-    curl -sL -o /caddysrc/caddy_linux_arm.tar.gz "${url}os=linux&arch=${CADDYARCH}${params}" && \
+    mkdir /caddysrc && CADDYARCH=$(echo "${arch}" | sed -e "s/armhf/arm7/g" -e "s/aarch64/arm64/g") && \
+    curl -sL -o /caddysrc/caddy_linux_arm.tar.gz "${url}${CADDYARCH}?plugins=${params}" && \
     tar -xf /caddysrc/caddy_linux_arm.tar.gz -C /caddysrc && \
     mv /caddysrc/caddy /usr/sbin/caddy && \
     chmod 755 /usr/sbin/caddy && \
